@@ -1,1285 +1,426 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#fff6fa">
-  <meta name="description" content="Richendy: un espacio para compartir la vida, organizar planes y construir juntos.">
-  <title>Richendy · Nuestro espacio</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#11130f">
+  <title>Richendy</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
   <style>
-    :root {
-      --pink: #ef82ad;
-      --pink-dark: #cf4e86;
-      --pink-light: #ffe4ef;
-      --lavender: #e9e2ff;
-      --lavender-dark: #8d78cb;
-      --mint: #dff5e9;
-      --cream: #fffaf6;
-      --paper: #ffffff;
-      --navy: #29243d;
-      --muted: #888395;
-      --line: #f0e8ee;
-      --shadow: 0 12px 35px rgba(72, 43, 73, .07);
-      --radius: 24px;
-    }
-
+    :root { color-scheme: dark; --bg:#0b0c0a; --panel:#151713; --panel-2:#1d201a; --text:#f2f4ec; --muted:#a6aa9d; --lime:#c7ff4a; --border:#30342b; }
     * { box-sizing: border-box; }
+    body { margin:0; min-height:100vh; background: radial-gradient(circle at 80% 10%, rgba(199,255,74,.09), transparent 28rem), var(--bg); color:var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; line-height:1.5; }
+    .wrap { width:100%; max-width:520px; margin:0 auto; padding:24px 18px 60px; }
+    .brand { display:flex; align-items:center; gap:12px; }
+    .mark { width:42px; height:42px; border-radius:14px; background:var(--lime); color:#11130f; display:grid; place-items:center; font-weight:900; font-size:22px; flex:none; }
+    .brand-name { font-size:19px; font-weight:800; letter-spacing:-.04em; }
+    .brand-sub { color:var(--muted); font-size:12px; margin-top:2px; }
+    .card { background:rgba(21,23,19,.96); border:1px solid var(--border); border-radius:20px; padding:20px; margin-bottom:14px; }
+    .eyebrow { color:var(--lime); text-transform:uppercase; letter-spacing:.13em; font-size:11px; font-weight:800; }
+    h1 { font-size:clamp(26px,6vw,34px); letter-spacing:-.05em; margin:9px 0 8px; }
+    h2 { font-size:16px; margin:0 0 4px; letter-spacing:-.02em; }
+    .intro, .muted { color:var(--muted); font-size:14px; }
+    .intro { margin:0 0 20px; }
+    .seg { display:grid; grid-template-columns:1fr 1fr; gap:5px; padding:5px; background:#0d0f0c; border:1px solid var(--border); border-radius:13px; margin-bottom:18px; }
+    .seg button, .apptab { border:0; padding:11px; border-radius:9px; background:transparent; color:var(--muted); font:inherit; font-weight:700; cursor:pointer; min-height:44px; }
+    .seg button.active, .apptab.active { background:var(--panel-2); color:var(--text); }
+    label { display:block; font-size:12px; font-weight:700; color:#dce0d4; margin:12px 0 6px; }
+    input, select { width:100%; padding:12px 14px; border:1px solid var(--border); background:#0d0f0c; border-radius:12px; color:var(--text); font:inherit; outline:none; min-height:46px; }
+    input:focus, select:focus { border-color:var(--lime); box-shadow:0 0 0 3px rgba(199,255,74,.1); }
+    .row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    @media (max-width:420px) { .row { grid-template-columns:1fr; } }
+    .primary { width:100%; border:0; border-radius:12px; padding:14px 16px; margin-top:16px; background:var(--lime); color:#11130f; font-weight:850; font-size:14px; cursor:pointer; min-height:46px; }
+    .primary:disabled { opacity:.55; cursor:wait; }
+    .secondary { border:1px solid var(--border); border-radius:10px; padding:9px 13px; background:transparent; color:var(--text); font:inherit; font-weight:700; cursor:pointer; min-height:40px; }
+    .link { background:none; border:0; color:var(--lime); font:inherit; font-size:13px; text-decoration:underline; cursor:pointer; padding:6px 0; }
+    :focus-visible { outline:2px solid var(--lime); outline-offset:2px; }
+    .message { display:none; padding:12px 13px; border-radius:12px; font-size:13px; margin-top:14px; overflow-wrap:anywhere; }
+    .message.show { display:block; }
+    .message.error { color:#ffd0d0; border:1px solid #713c3c; background:#281716; }
+    .message.ok { color:var(--lime); border:1px solid #46572a; background:#1b2411; }
+    .notice { border:1px solid #46572a; background:#1b2411; color:#dfffa0; padding:12px; border-radius:12px; font-size:13px; margin-bottom:14px; }
+    .setup { border:1px solid #7a6233; color:#f5dca5; background:#282112; padding:12px; border-radius:12px; font-size:13px; margin-bottom:16px; }
+    .top { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; }
+    .apptabs { display:grid; grid-template-columns:repeat(4,1fr); gap:4px; padding:5px; background:#0d0f0c; border:1px solid var(--border); border-radius:14px; margin-bottom:16px; position:sticky; top:8px; z-index:2; }
+    .apptab { padding:10px 2px; font-size:13px; }
+    .list { display:grid; gap:8px; margin-top:12px; }
+    .item { display:flex; align-items:center; gap:12px; background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:11px 13px; }
+    .item input[type=checkbox] { width:22px; height:22px; min-height:0; accent-color:var(--lime); flex:none; }
+    .grow { flex:1; min-width:0; overflow-wrap:anywhere; }
+    .meta { display:block; font-size:12px; color:var(--muted); }
+    .item.done strong { text-decoration:line-through; color:var(--muted); }
+    .amount { font-weight:800; white-space:nowrap; }
+    .x { background:none; border:0; color:var(--muted); font:inherit; font-size:13px; cursor:pointer; padding:8px; min-height:40px; }
+    .total { display:flex; justify-content:space-between; align-items:baseline; background:var(--panel-2); border:1px solid var(--border); border-radius:16px; padding:14px 16px; margin-top:14px; }
+    .total strong { font-size:24px; letter-spacing:-.03em; color:var(--lime); }
+    .empty { text-align:center; color:var(--muted); padding:22px 0; font-size:14px; }
+    .chip { font-size:12px; font-weight:700; padding:3px 10px; border-radius:99px; background:var(--panel-2); border:1px solid var(--border); color:var(--muted); white-space:nowrap; }
+    .chip.lime { color:var(--lime); border-color:#46572a; }
 
-    body {
-      margin: 0;
-      min-height: 100vh;
-      color: var(--navy);
-      font-family: "Nunito Sans", sans-serif;
-      background:
-        radial-gradient(ellipse at 0% 0%, #ffe8f1 0, transparent 34%),
-        radial-gradient(ellipse at 100% 10%, #eee8ff 0, transparent 32%),
-        #fffafc;
-    }
+    .monthnav { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+    .monthnav strong { text-transform:capitalize; font-size:17px; letter-spacing:-.02em; }
+    .monthnav button { min-width:46px; }
+    details.card summary { cursor:pointer; font-weight:800; min-height:24px; }
+    .sum { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .pc { background:var(--panel); border:1px solid var(--border); border-left:5px solid var(--pc); border-radius:14px; padding:10px 12px; display:grid; font-size:13px; color:var(--muted); }
+    .pc strong { color:var(--text); font-size:14px; }
+    .cal { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-top:14px; }
+    .cal .wd { text-align:center; font-size:11px; color:var(--muted); }
+    .dayb { min-height:52px; border:1px solid var(--border); background:var(--panel); border-radius:10px; color:var(--text); font:inherit; font-size:13px; cursor:pointer; padding:5px 2px; display:grid; justify-items:center; align-content:space-between; }
+    .dayb.today { border-color:var(--lime); } .dayb.sel { background:var(--panel-2); box-shadow:0 0 0 2px var(--lime) inset; }
+    .dayb.empty { border:0; background:none; cursor:default; }
+    .dots { display:flex; gap:2px; flex-wrap:wrap; justify-content:center; min-height:8px; }
+    .dot { width:9px; height:9px; border-radius:50%; border:2px solid var(--pc); display:inline-block; flex:none; }
+    .dot.full { background:var(--pc); }
+    .dayh { font-size:12px; color:var(--muted); margin:12px 2px 0; text-transform:capitalize; }
+    .item { flex-wrap:wrap; }
 
-    button, input, textarea, select { font: inherit; }
-    button { cursor: pointer; }
-    button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
-      outline: 3px solid #d8c9ff;
-      outline-offset: 2px;
-    }
-
-    h1, h2, h3, h4, p { margin-top: 0; }
-    h1, h2, h3, h4 { font-family: Poppins, sans-serif; }
-    .hidden { display: none !important; }
-    .muted { color: var(--muted); }
-    .small { font-size: 12px; }
-    .eyebrow {
-      color: var(--pink-dark);
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 1.8px;
-      text-transform: uppercase;
-    }
-
-    .btn {
-      border: 0;
-      border-radius: 14px;
-      padding: 12px 17px;
-      font-weight: 800;
-      transition: transform .2s, opacity .2s;
-    }
-    .btn:hover { transform: translateY(-1px); }
-    .btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
-    .btn-primary {
-      color: white;
-      background: linear-gradient(135deg, #f08bb5, #d96b9d);
-      box-shadow: 0 8px 18px #e989b42b;
-    }
-    .btn-soft { color: #a44978; background: #ffe8f1; }
-    .btn-lavender { color: #6854a2; background: #eee8ff; }
-    .btn-outline { color: var(--navy); background: white; border: 1px solid var(--line); }
-    .btn-block { width: 100%; }
-    .icon-btn {
-      width: 42px; height: 42px; display: grid; place-items: center;
-      border: 1px solid var(--line); border-radius: 14px;
-      background: white; color: var(--navy); font-size: 18px;
-    }
-
-    .brand {
-      display: flex; align-items: center; gap: 10px;
-      font-family: Poppins, sans-serif; font-size: 23px; font-weight: 800;
-      letter-spacing: -.8px;
-    }
-    .brand-mark {
-      width: 42px; height: 42px; display: grid; place-items: center;
-      color: white; font-size: 22px; border-radius: 15px;
-      background: linear-gradient(145deg, #f6a0c1, #b5a2ef);
-      box-shadow: 0 8px 20px #d68bbd35;
-    }
-    .brand .dot { color: var(--pink-dark); }
-
-    /* Acceso */
-    #authScreen {
-      min-height: 100vh; display: grid; place-items: center;
-      padding: 24px;
-    }
-    .auth-layout {
-      width: min(100%, 980px); display: grid;
-      grid-template-columns: 1fr 1fr; overflow: hidden;
-      background: white; border: 1px solid #f5eaf1;
-      border-radius: 32px; box-shadow: var(--shadow);
-    }
-    .auth-art {
-      min-height: 540px; display: flex; flex-direction: column;
-      justify-content: space-between; padding: 40px;
-      background: linear-gradient(150deg, #ffe2ed, #eee7ff 65%, #e1f6ed);
-      position: relative; overflow: hidden;
-    }
-    .auth-art::before, .auth-art::after {
-      content: ""; position: absolute; border-radius: 50%;
-      background: #ffffff70; pointer-events: none;
-    }
-    .auth-art::before { width: 280px; height: 280px; right: -100px; top: 80px; }
-    .auth-art::after { width: 180px; height: 180px; left: -70px; bottom: 60px; }
-    .art-copy, .art-footer, .brand { position: relative; z-index: 1; }
-    .art-copy { margin-top: 75px; }
-    .art-copy h1 { font-size: clamp(30px, 4vw, 45px); line-height: 1.2; letter-spacing: -1.8px; }
-    .art-copy p { max-width: 320px; line-height: 1.8; color: #655e77; }
-    .heart-art {
-      font-size: 78px; margin-bottom: 22px;
-      filter: drop-shadow(0 8px 14px #d16f9d30);
-    }
-    .art-footer { color: #71677d; font-size: 12px; }
-    .auth-form-wrap { padding: 42px; align-self: center; }
-    .auth-form-wrap h2 { margin: 25px 0 8px; font-size: 26px; }
-    .auth-form-wrap > p { color: var(--muted); font-size: 14px; line-height: 1.7; }
-    .form-field { margin: 16px 0; }
-    .form-field label { display: block; margin-bottom: 7px; font-size: 13px; font-weight: 800; }
-    .form-field input, .form-field textarea, .form-field select {
-      width: 100%; padding: 13px 14px; color: var(--navy);
-      background: #fffafd; border: 1px solid #eee5ee; border-radius: 13px;
-    }
-    .form-field textarea { min-height: 95px; resize: vertical; }
-    .auth-switch { margin-top: 20px; text-align: center; font-size: 13px; }
-    .text-btn { border: 0; background: none; color: var(--pink-dark); font-weight: 800; }
-    .notice { margin-top: 14px; font-size: 13px; line-height: 1.6; }
-    .notice.error { color: #b42348; }
-    .notice.ok { color: #237d56; }
-
-    /* Aplicación */
-    #appScreen { min-height: 100vh; }
-    .app-shell { display: grid; grid-template-columns: 250px minmax(0, 1fr); min-height: 100vh; }
-    .sidebar {
-      padding: 28px 18px; background: #fff;
-      border-right: 1px solid var(--line);
-      display: flex; flex-direction: column; gap: 30px;
-    }
-    .sidebar .brand { padding: 0 8px; }
-    .nav-label {
-      margin: 0 12px 10px; color: #aaa2b1;
-      font-size: 10px; letter-spacing: 1.6px; font-weight: 800;
-      text-transform: uppercase;
-    }
-    .nav-list { display: grid; gap: 5px; }
-    .nav-item {
-      display: flex; align-items: center; gap: 12px;
-      width: 100%; padding: 12px 13px; border: 0;
-      background: transparent; color: #817a90; border-radius: 14px;
-      text-align: left; font-size: 14px; font-weight: 800;
-    }
-    .nav-item .nav-icon { width: 24px; text-align: center; font-size: 18px; }
-    .nav-item:hover { background: #fff5fa; color: var(--pink-dark); }
-    .nav-item.active { background: #ffeaf3; color: #b94b7c; }
-    .sidebar-bottom { margin-top: auto; }
-    .couple-mini {
-      padding: 17px; border-radius: 19px;
-      background: linear-gradient(145deg, #fff0f6, #f0eaff);
-    }
-    .couple-mini strong { display: block; font-family: Poppins, sans-serif; font-size: 13px; }
-    .couple-mini p { margin: 6px 0 0; color: #82778e; font-size: 12px; line-height: 1.6; }
-
-    .main-area { min-width: 0; }
-    .topbar {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 15px; padding: 22px 34px;
-      background: #ffffffb8; border-bottom: 1px solid #f1e8ef;
-      backdrop-filter: blur(14px);
-    }
-    .topbar-title { font-family: Poppins, sans-serif; font-size: 14px; font-weight: 700; }
-    .topbar-right { display: flex; align-items: center; gap: 12px; }
-    .user-pill {
-      display: flex; align-items: center; gap: 10px;
-      padding: 7px 12px 7px 7px; background: white;
-      border: 1px solid var(--line); border-radius: 18px;
-    }
-    .avatar {
-      width: 37px; height: 37px; border-radius: 50%;
-      display: grid; place-items: center; overflow: hidden;
-      color: #a54c7c; background: #ffe0ed; font-weight: 800;
-    }
-    .avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .user-pill strong { display: block; font-size: 12px; }
-    .user-pill span { display: block; color: var(--muted); font-size: 11px; }
-
-    .content { width: min(100%, 1250px); margin: 0 auto; padding: 32px 34px 55px; }
-    .page { display: none; animation: fade .25s ease; }
-    .page.active { display: block; }
-    @keyframes fade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
-    .page-heading {
-      display: flex; align-items: flex-end; justify-content: space-between;
-      gap: 18px; margin-bottom: 25px;
-    }
-    .page-heading h1 { margin: 5px 0 8px; font-size: clamp(25px, 3vw, 34px); letter-spacing: -1px; }
-    .page-heading p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
-    .hero {
-      display: grid; grid-template-columns: 1.3fr .7fr; gap: 20px;
-      padding: 32px; border-radius: 28px; overflow: hidden;
-      background: linear-gradient(120deg, #ffe7f0 0%, #f0e9ff 72%, #e4f7ee 100%);
-      position: relative; margin-bottom: 24px;
-    }
-    .hero h2 { max-width: 470px; margin: 10px 0 12px; font-size: clamp(25px, 3vw, 38px); line-height: 1.25; letter-spacing: -1.3px; }
-    .hero p { max-width: 440px; color: #746b83; line-height: 1.8; font-size: 14px; }
-    .hero-art { display: grid; place-items: center; min-height: 180px; }
-    .hero-heart {
-      width: 150px; height: 150px; display: grid; place-items: center;
-      border: 1px solid #ffffffb0; border-radius: 42px;
-      background: #ffffff80; transform: rotate(-7deg);
-      font-size: 76px; box-shadow: 0 20px 40px #aa7ca326;
-    }
-    .grid { display: grid; gap: 18px; }
-    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .card {
-      padding: 22px; background: white; border: 1px solid #f1e9f0;
-      border-radius: var(--radius); box-shadow: 0 5px 22px #50325305;
-      min-width: 0;
-    }
-    .card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
-    .card-head h3 { margin: 0; font-size: 15px; }
-    .card-icon {
-      width: 42px; height: 42px; display: grid; place-items: center;
-      border-radius: 15px; font-size: 20px; flex-shrink: 0;
-    }
-    .bg-pink { background: #ffe7f0; }
-    .bg-lavender { background: #eee8ff; }
-    .bg-mint { background: #e3f7eb; }
-    .bg-cream { background: #fff1df; }
-    .stat-number { margin: 8px 0 5px; font-family: Poppins, sans-serif; font-size: 29px; font-weight: 800; letter-spacing: -1px; }
-    .stat-label { color: var(--muted); font-size: 12px; }
-    .section-title { margin: 30px 0 15px; font-size: 18px; }
-    .quick-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
-    .quick-action {
-      padding: 17px 14px; text-align: left; background: white;
-      border: 1px solid var(--line); border-radius: 18px; color: var(--navy);
-    }
-    .quick-action:hover { border-color: #f3b8d1; transform: translateY(-2px); }
-    .quick-action span { display: block; font-size: 24px; margin-bottom: 12px; }
-    .quick-action strong { display: block; font-size: 13px; }
-    .quick-action small { display: block; margin-top: 5px; color: var(--muted); font-size: 11px; line-height: 1.5; }
-    .list { display: grid; gap: 10px; }
-    .list-item {
-      display: flex; align-items: center; gap: 12px;
-      padding: 13px; background: #fffafd; border: 1px solid #f5edf3;
-      border-radius: 15px; min-width: 0;
-    }
-    .list-item .item-main { flex: 1; min-width: 0; }
-    .list-item strong { display: block; font-size: 13px; overflow-wrap: anywhere; }
-    .list-item small { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; }
-    .list-item .item-actions { display: flex; gap: 5px; }
-    .tag {
-      display: inline-flex; align-items: center; padding: 5px 9px;
-      border-radius: 20px; background: #f1edff; color: #7966b0;
-      font-size: 10px; font-weight: 800;
-    }
-    .empty {
-      padding: 27px 15px; text-align: center;
-      border: 1px dashed #e8dce8; border-radius: 17px; color: var(--muted);
-      font-size: 13px; line-height: 1.7;
-    }
-    .empty .empty-icon { font-size: 30px; margin-bottom: 8px; }
-
-    .profile-card { text-align: center; }
-    .profile-photo {
-      width: 100px; height: 100px; margin: 0 auto 15px;
-      border: 4px solid #fff0f6; border-radius: 50%;
-      background: linear-gradient(145deg, #ffe0ed, #e7ddff);
-      display: grid; place-items: center; font-size: 40px; overflow: hidden;
-    }
-    .profile-photo img { width: 100%; height: 100%; object-fit: cover; }
-    .profile-card h3 { margin-bottom: 5px; font-size: 18px; }
-    .profile-card p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
-    .profile-card .btn { margin-top: 15px; }
-    .feature-card h3 { margin: 12px 0 8px; font-size: 15px; }
-    .feature-card p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.7; }
-    .progress-track { height: 8px; border-radius: 20px; background: #f4eaf2; overflow: hidden; }
-    .progress-fill { height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, #f3a1c1, #b5a2ef); }
-    .progress-row { display: flex; justify-content: space-between; gap: 12px; margin: 14px 0 8px; font-size: 12px; }
-
-    .bottom-nav { display: none; }
-    .modal-backdrop {
-      position: fixed; inset: 0; z-index: 50; padding: 18px;
-      display: grid; place-items: center; background: #2820386b;
-      backdrop-filter: blur(5px);
-    }
-    .modal {
-      width: min(100%, 520px); max-height: 90vh; overflow-y: auto;
-      padding: 25px; background: white; border-radius: 24px;
-      box-shadow: 0 25px 80px #22132d30;
-    }
-    .modal-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-    .modal-head h2 { margin: 0; font-size: 20px; }
-    .modal-body { margin-top: 15px; }
-    .toast {
-      position: fixed; z-index: 100; bottom: 25px; right: 25px;
-      max-width: min(400px, calc(100vw - 35px)); padding: 14px 18px;
-      background: #302841; color: white; border-radius: 15px;
-      box-shadow: var(--shadow); font-size: 13px; line-height: 1.6;
-    }
-    .footer-note { margin-top: 35px; text-align: center; color: #b0a5b2; font-size: 11px; }
-
-    @media (max-width: 1000px) {
-      .app-shell { grid-template-columns: 215px minmax(0, 1fr); }
-      .content { padding: 26px 23px 45px; }
-      .topbar { padding: 18px 23px; }
-      .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .quick-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    }
-    @media (max-width: 720px) {
-      .auth-layout { grid-template-columns: 1fr; max-width: 460px; }
-      .auth-art { min-height: auto; padding: 25px; }
-      .auth-art .art-copy { margin-top: 30px; }
-      .auth-art .art-copy h1 { font-size: 30px; }
-      .auth-art .heart-art { display: none; }
-      .auth-art .art-footer { display: none; }
-      .auth-form-wrap { padding: 26px; }
-      .auth-form-wrap h2 { margin-top: 12px; }
-      .app-shell { display: block; }
-      .sidebar { display: none; }
-      .topbar { padding: 14px 17px; }
-      .topbar-title { display: none; }
-      .content { padding: 23px 16px 100px; }
-      .hero { grid-template-columns: 1fr; padding: 24px; }
-      .hero-art { min-height: 110px; }
-      .hero-heart { width: 100px; height: 100px; font-size: 50px; border-radius: 30px; }
-      .page-heading { align-items: flex-start; flex-direction: column; }
-      .grid-2, .grid-3 { grid-template-columns: 1fr; }
-      .quick-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .card { padding: 18px; }
-      .user-pill { padding-right: 8px; }
-      .user-pill .user-text { display: none; }
-      .bottom-nav {
-        display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
-        position: fixed; z-index: 20; bottom: 0; left: 0; right: 0;
-        padding: 9px 5px calc(9px + env(safe-area-inset-bottom));
-        background: #ffffffed; border-top: 1px solid var(--line);
-        backdrop-filter: blur(15px);
-      }
-      .bottom-nav button {
-        border: 0; background: none; color: #91899b;
-        display: grid; place-items: center; gap: 4px;
-        font-size: 10px; font-weight: 800; padding: 5px 1px;
-      }
-      .bottom-nav button span { font-size: 19px; }
-      .bottom-nav button.active { color: var(--pink-dark); }
-      .toast { bottom: 85px; right: 12px; }
-    }
+    .sw { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+    .swb { width:38px; height:38px; border-radius:50%; border:2px solid var(--border); background:var(--c); cursor:pointer; padding:0; }
+    .swb.on { box-shadow:0 0 0 3px var(--bg), 0 0 0 5px var(--c); }
+    .sw input[type=color] { width:46px; height:38px; min-height:38px; padding:2px; border-radius:12px; cursor:pointer; }
+    #toast { position:fixed; left:50%; bottom:20px; transform:translate(-50%,16px); opacity:0; pointer-events:none; background:var(--panel-2); border:1px solid var(--border); padding:11px 16px; border-radius:12px; font-size:14px; max-width:90vw; transition:opacity .2s, transform .2s; z-index:9; }
+    #toast.show { opacity:1; transform:translate(-50%,0); }
+    @media (prefers-reduced-motion:reduce) { * { transition:none !important; } }
   </style>
 </head>
 <body>
-
-  <!-- PANTALLA DE ACCESO -->
-  <section id="authScreen">
-    <div class="auth-layout">
-      <div class="auth-art">
-        <div class="brand">
-          <span class="brand-mark">♡</span>
-          <span>richendy<span class="dot">.</span></span>
-        </div>
-        <div class="art-copy">
-          <div class="heart-art">💗</div>
-          <div class="eyebrow">Un espacio para dos</div>
-          <h1>La vida juntos, un poquito más fácil.</h1>
-          <p>Organicemos los planes, compartamos responsabilidades y celebremos todo lo que construimos juntos.</p>
-        </div>
-        <div class="art-footer">Hecho con cariño, para ustedes. ♡</div>
-      </div>
-
-      <div class="auth-form-wrap">
-        <div id="loginForm">
-          <div class="eyebrow">Qué bueno tenerte aquí</div>
-          <h2>Hola de nuevo ✨</h2>
-          <p>Entra a vuestro espacio compartido y continuemos construyendo recuerdos.</p>
-          <form id="signInForm">
-            <div class="form-field">
-              <label for="loginEmail">Correo electrónico</label>
-              <input id="loginEmail" type="email" autocomplete="email" required placeholder="tu@correo.com">
-            </div>
-            <div class="form-field">
-              <label for="loginPassword">Contraseña</label>
-              <input id="loginPassword" type="password" autocomplete="current-password" required placeholder="Tu contraseña">
-            </div>
-            <button id="loginButton" class="btn btn-primary btn-block" type="submit">Entrar a Richendy →</button>
-          </form>
-          <div class="auth-switch">
-            ¿Olvidaste tu contraseña?
-            <button class="text-btn" id="forgotPasswordButton" type="button">Recuperarla</button>
-          </div>
-          <div class="auth-switch">
-            ¿Primera vez aquí?
-            <button class="text-btn" id="showRegister" type="button">Crear una cuenta</button>
-          </div>
-        </div>
-
-        <div id="registerForm" class="hidden">
-          <div class="eyebrow">Un nuevo comienzo</div>
-          <h2>Bienvenido a casa 💕</h2>
-          <p>Crea tu cuenta para empezar a preparar vuestro espacio.</p>
-          <form id="signUpForm">
-            <div class="form-field">
-              <label for="registerName">Cómo te llamas</label>
-              <input id="registerName" type="text" autocomplete="name" required placeholder="Tu nombre">
-            </div>
-            <div class="form-field">
-              <label for="registerEmail">Correo electrónico</label>
-              <input id="registerEmail" type="email" autocomplete="email" required placeholder="tu@correo.com">
-            </div>
-            <div class="form-field">
-              <label for="registerPassword">Crea una contraseña</label>
-              <input id="registerPassword" type="password" autocomplete="new-password" minlength="6" required placeholder="Mínimo 6 caracteres">
-            </div>
-            <button id="registerButton" class="btn btn-primary btn-block" type="submit">Crear mi cuenta ♡</button>
-          </form>
-          <div class="auth-switch">
-            ¿Ya tienes cuenta?
-            <button class="text-btn" id="showLogin" type="button">Iniciar sesión</button>
-          </div>
-        </div>
-        <div id="authMessage" class="notice" role="status" aria-live="polite"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- APLICACIÓN -->
-  <section id="appScreen" class="hidden">
-    <div class="app-shell">
-      <aside class="sidebar">
-        <div class="brand">
-          <span class="brand-mark">♡</span>
-          <span>richendy<span class="dot">.</span></span>
-        </div>
-        <div>
-          <p class="nav-label">Nuestro espacio</p>
-          <nav class="nav-list" aria-label="Navegación principal">
-            <button class="nav-item active" data-page="home"><span class="nav-icon">⌂</span> Inicio</button>
-            <button class="nav-item" data-page="couple"><span class="nav-icon">♡</span> Conocernos</button>
-            <button class="nav-item" data-page="planning"><span class="nav-icon">▦</span> Planificación</button>
-            <button class="nav-item" data-page="activities"><span class="nav-icon">✧</span> Actividades</button>
-            <button class="nav-item" data-page="finances"><span class="nav-icon">♧</span> Finanzas</button>
-            <button class="nav-item" data-page="shopping"><span class="nav-icon">♡</span> Compras</button>
-            <button class="nav-item" data-page="dashboard"><span class="nav-icon">▥</span> Dashboard</button>
-            <button class="nav-item" data-page="settings"><span class="nav-icon">⚙</span> Configuración</button>
-          </nav>
-        </div>
-        <div class="sidebar-bottom">
-          <div class="couple-mini">
-            <strong>Un equipo, dos personas 💞</strong>
-            <p>La organización también puede ser una forma de cuidarse.</p>
-          </div>
-          <button class="nav-item" id="logoutButton" style="margin-top:12px"><span class="nav-icon">↪</span> Cerrar sesión</button>
-        </div>
-      </aside>
-
-      <main class="main-area">
-        <header class="topbar">
-          <div class="topbar-title" id="topbarTitle">Nuestro pequeño universo ♡</div>
-          <div class="topbar-right">
-            <button class="icon-btn" id="topbarAddButton" title="Crear una actividad" aria-label="Crear una actividad">＋</button>
-            <div class="user-pill">
-              <div class="avatar" id="headerAvatar">♡</div>
-              <div class="user-text">
-                <strong id="headerName">Mi perfil</strong>
-                <span>Tu espacio personal</span>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        <div class="content">
-          <!-- INICIO -->
-          <section class="page active" id="page-home">
-            <div class="hero">
-              <div>
-                <div class="eyebrow" id="todayLabel">Un nuevo día juntos</div>
-                <h2 id="welcomeTitle">Lo bonito también se organiza. 💗</h2>
-                <p>Este es vuestro rincón para coordinar la vida cotidiana, guardar ideas y hacer espacio para lo que importa.</p>
-                <button class="btn btn-primary" data-go="planning">Organizar nuestro día →</button>
-              </div>
-              <div class="hero-art"><div class="hero-heart">💞</div></div>
-            </div>
-
-            <div class="grid grid-3">
-              <article class="card">
-                <div class="card-head"><h3>Planes compartidos</h3><div class="card-icon bg-pink">🗓️</div></div>
-                <div class="stat-number" id="homeActivityCount">0</div>
-                <div class="stat-label">Actividades guardadas en este dispositivo</div>
-              </article>
-              <article class="card">
-                <div class="card-head"><h3>Lista de compras</h3><div class="card-icon bg-lavender">🛍️</div></div>
-                <div class="stat-number" id="homeShoppingCount">0</div>
-                <div class="stat-label">Artículos pendientes</div>
-              </article>
-              <article class="card">
-                <div class="card-head"><h3>Nuestro equipo</h3><div class="card-icon bg-mint">🫶</div></div>
-                <div class="stat-number" id="homeMemberCount">—</div>
-                <div class="stat-label" id="homeHouseholdLabel">Estado del espacio compartido</div>
-              </article>
-            </div>
-
-            <h2 class="section-title">¿Qué hacemos hoy?</h2>
-            <div class="quick-grid">
-              <button class="quick-action" data-go="planning"><span>🗓️</span><strong>Planificar</strong><small>Organiza los pendientes.</small></button>
-              <button class="quick-action" data-go="activities"><span>🌷</span><strong>Crear un plan</strong><small>Guarda una nueva actividad.</small></button>
-              <button class="quick-action" data-go="finances"><span>💰</span><strong>Finanzas</strong><small>Consulta el espacio financiero.</small></button>
-              <button class="quick-action" data-go="shopping"><span>🛍️</span><strong>Ir de compras</strong><small>Prepara la lista compartida.</small></button>
-            </div>
-
-            <h2 class="section-title">Lo que viene</h2>
-            <div class="card">
-              <div id="homeUpcoming" class="list"></div>
-            </div>
-          </section>
-
-          <!-- CONOCERNOS -->
-          <section class="page" id="page-couple">
-            <div class="page-heading">
-              <div><div class="eyebrow">La mejor parte de nosotros</div><h1>Conocernos ♡</h1><p>Dos personalidades, un espacio que pueden hacer suyo.</p></div>
-            </div>
-            <div class="grid grid-2">
-              <article class="card profile-card">
-                <div class="profile-photo" id="richardPhoto">🧑🏻‍💻</div>
-                <h3>Richard</h3><p>Tecnología, ideas y nuevos proyectos.</p>
-                <button class="btn btn-soft" data-edit-profile="Richard">Personalizar perfil</button>
-              </article>
-              <article class="card profile-card">
-                <div class="profile-photo" id="wendyPhoto">🌷</div>
-                <h3>Wendy</h3><p>Detalles bonitos, cariño y creatividad.</p>
-                <button class="btn btn-lavender" data-edit-profile="Wendy">Personalizar perfil</button>
-              </article>
-            </div>
-            <h2 class="section-title">Nuestro espacio compartido</h2>
-            <div class="grid grid-2">
-              <article class="card feature-card"><div class="card-icon bg-pink">💌</div><h3>Acuerdos con cariño</h3><p>Un lugar para recordar acuerdos, conversar sobre necesidades y construir rutinas que funcionen para ambos.</p><button class="btn btn-soft" data-open-modal="agreement" style="margin-top:15px">Añadir acuerdo</button><div id="agreementList" class="list" style="margin-top:15px"></div></article>
-              <article class="card feature-card"><div class="card-icon bg-lavender">✨</div><h3>Ideas para nosotros</h3><p>Guarden experiencias que quieren vivir, pequeños detalles y planes que les ilusionen.</p><button class="btn btn-lavender" data-open-modal="activity" style="margin-top:15px">Guardar una idea</button></article>
-            </div>
-          </section>
-
-          <!-- PLANIFICACIÓN -->
-          <section class="page" id="page-planning">
-            <div class="page-heading">
-              <div><div class="eyebrow">Menos caos, más momentos</div><h1>Planificación 🗓️</h1><p>Una visión clara de las cosas que quieren organizar.</p></div>
-              <button class="btn btn-primary" data-open-modal="activity">＋ Nuevo plan</button>
-            </div>
-            <div class="grid grid-2">
-              <article class="card"><div class="card-head"><h3>Planes y fechas</h3><div class="card-icon bg-pink">📆</div></div><div id="planningActivities" class="list"></div></article>
-              <article class="card"><div class="card-head"><h3>Organización semanal</h3><div class="card-icon bg-lavender">🧩</div></div><p class="muted small">Empiecen por lo importante y ajusten el plan cuando lo necesiten.</p><div class="progress-row"><span>Planes registrados</span><strong id="planningCount">0</strong></div><div class="progress-track"><div class="progress-fill" id="planningProgress"></div></div><div class="notice">Los planes que se creen en esta versión se guardan en el navegador de este dispositivo, no en Supabase.</div></article>
-            </div>
-          </section>
-
-          <!-- ACTIVIDADES -->
-          <section class="page" id="page-activities">
-            <div class="page-heading">
-              <div><div class="eyebrow">Colección de buenos momentos</div><h1>Actividades ✧</h1><p>Citas, salidas, ideas y experiencias por compartir.</p></div>
-              <button class="btn btn-primary" data-open-modal="activity">＋ Nueva actividad</button>
-            </div>
-            <div class="card"><div id="activityList" class="list"></div></div>
-          </section>
-
-          <!-- FINANZAS -->
-          <section class="page" id="page-finances">
-            <div class="page-heading">
-              <div><div class="eyebrow">Claridad para decidir juntos</div><h1>Finanzas 💰</h1><p>Consulta el acceso financiero de tu hogar sin poner en riesgo los datos existentes.</p></div>
-            </div>
-            <div class="grid grid-2">
-              <article class="card feature-card"><div class="card-icon bg-mint">🏡</div><h3>Presupuestos y gastos</h3><p>Esta sección necesita confirmar las columnas y relaciones de tus tablas de Supabase antes de habilitar registros o modificaciones.</p><button class="btn btn-outline" id="refreshFinanceButton" style="margin-top:15px">Consultar conexión</button><div id="financeStatus" class="notice">Todavía no se ha consultado la información financiera.</div></article>
-              <article class="card feature-card"><div class="card-icon bg-lavender">🌱</div><h3>Objetivos compartidos</h3><p>Piensen en proyectos, gastos comunes y metas que quieran alcanzar juntos.</p><div class="empty" style="margin-top:15px">La visualización de presupuestos se habilitará al verificar el esquema existente. No se crean tablas automáticamente.</div></article>
-            </div>
-          </section>
-
-          <!-- COMPRAS -->
-          <section class="page" id="page-shopping">
-            <div class="page-heading">
-              <div><div class="eyebrow">Todo lo que hace falta</div><h1>Lista de compras 🛍️</h1><p>Guarda lo que necesitan y marca lo que ya consiguieron.</p></div>
-              <button class="btn btn-primary" data-open-modal="shopping">＋ Añadir artículo</button>
-            </div>
-            <div class="card">
-              <div class="progress-row"><span>Progreso de la lista</span><strong id="shoppingProgressText">0 de 0</strong></div>
-              <div class="progress-track"><div class="progress-fill" id="shoppingProgress"></div></div>
-              <div id="shoppingList" class="list" style="margin-top:18px"></div>
-            </div>
-            <p class="notice muted">Esta lista es local a este navegador. Todavía no se sincroniza entre las cuentas de Richard y Wendy.</p>
-          </section>
-
-          <!-- DASHBOARD -->
-          <section class="page" id="page-dashboard">
-            <div class="page-heading">
-              <div><div class="eyebrow">Pequeños pasos, grandes cambios</div><h1>Nuestro dashboard ✨</h1><p>Un resumen de lo que han ido preparando juntos.</p></div>
-            </div>
-            <div class="grid grid-3">
-              <article class="card"><div class="card-icon bg-pink">💗</div><div class="stat-number" id="dashActivities">0</div><div class="stat-label">Actividades guardadas localmente</div></article>
-              <article class="card"><div class="card-icon bg-lavender">🛍️</div><div class="stat-number" id="dashShopping">0</div><div class="stat-label">Artículos pendientes</div></article>
-              <article class="card"><div class="card-icon bg-mint">💌</div><div class="stat-number" id="dashAgreements">0</div><div class="stat-label">Acuerdos guardados localmente</div></article>
-            </div>
-            <h2 class="section-title">Una nota importante</h2>
-            <div class="card"><p style="line-height:1.8">Este resumen refleja únicamente los datos guardados en el navegador actual. No representa todavía todas las actividades de la pareja ni los datos de Supabase. La sincronización compartida debe conectarse y probarse por separado.</p></div>
-          </section>
-
-          <!-- CONFIGURACIÓN -->
-          <section class="page" id="page-settings">
-            <div class="page-heading">
-              <div><div class="eyebrow">A tu manera</div><h1>Configuración ⚙️</h1><p>Personaliza tu experiencia y revisa el estado de tu cuenta.</p></div>
-            </div>
-            <div class="grid grid-2">
-              <article class="card">
-                <div class="card-head"><h3>Mi perfil</h3><div class="card-icon bg-pink">👤</div></div>
-                <form id="settingsForm">
-                  <div class="form-field"><label for="settingsName">Nombre visible</label><input id="settingsName" type="text" maxlength="60" placeholder="Tu nombre"></div>
-                  <div class="form-field"><label for="settingsPhoto">URL pública de foto de perfil</label><input id="settingsPhoto" type="url" placeholder="https://..."></div>
-                  <button class="btn btn-primary" type="submit">Guardar preferencias locales</button>
-                </form>
-                <p class="muted small" style="margin-top:12px">Las preferencias de esta pantalla se guardan solo en este navegador.</p>
-              </article>
-              <article class="card">
-                <div class="card-head"><h3>Cuenta y conexión</h3><div class="card-icon bg-lavender">🔐</div></div>
-                <p class="muted small">Cuenta autenticada</p>
-                <strong id="settingsEmail" style="overflow-wrap:anywhere">—</strong>
-                <div class="progress-row"><span>Conexión con Supabase</span><strong id="connectionLabel">Pendiente</strong></div>
-                <div id="connectionMessage" class="notice">La autenticación se utiliza para iniciar sesión. Los datos de cada sección deben verificarse antes de habilitar escrituras.</div>
-                <button class="btn btn-outline" id="checkConnectionButton" style="margin-top:12px">Verificar sesión</button>
-                <button class="btn btn-soft" id="settingsLogoutButton" style="margin-top:12px">Cerrar sesión</button>
-              </article>
-            </div>
-            <div class="card" style="margin-top:18px">
-              <h3>Privacidad y almacenamiento</h3>
-              <p class="muted small" style="line-height:1.8">Richendy no ejecuta cambios de esquema, no elimina tablas y no utiliza claves secretas en el navegador. Los datos locales de actividades, acuerdos y compras no se sincronizan con otra persona. La sincronización real requiere conectar cada sección con las tablas existentes y verificar sus permisos RLS.</p>
-            </div>
-          </section>
-
-          <div class="footer-note">Richendy · Un espacio para compartir la vida ♡</div>
-        </div>
-      </main>
-    </div>
-
-    <nav class="bottom-nav" aria-label="Navegación móvil">
-      <button class="active" data-page="home"><span>⌂</span>Inicio</button>
-      <button data-page="planning"><span>▦</span>Planes</button>
-      <button data-page="activities"><span>✧</span>Actividades</button>
-      <button data-page="shopping"><span>🛍️</span>Compras</button>
-      <button data-page="settings"><span>⚙</span>Ajustes</button>
-    </nav>
-  </section>
-
-  <!-- VENTANAS MODALES -->
-  <div id="modalBackdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div class="modal">
-      <div class="modal-head">
-        <h2 id="modalTitle">Añadir</h2>
-        <button id="closeModalButton" class="icon-btn" type="button" aria-label="Cerrar">×</button>
-      </div>
-      <div class="modal-body" id="modalBody"></div>
-    </div>
-  </div>
-  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
-
+  <main class="wrap" id="root"></main>
+  <div id="toast" role="status" aria-live="polite"></div>
   <script>
-    "use strict";
-
-    // CONFIGURACIÓN: usa la URL base del proyecto y la clave PUBLICABLE.
-    // Nunca pegues aquí una clave service_role o secret.
+    // Valores públicos del proyecto "richendy" (clave anon). Nunca pongas aquí la service_role.
     const SUPABASE_URL = "https://qpeiqtlhxvmonysddwtn.supabase.co";
-    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_PXvKitEp2QJSxBuT-wabgA_6thOrLZZ";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwZWlxdGxoeHZtb255c2Rkd3RuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyMDY3NTUsImV4cCI6MjEwODc4Mjc1NX0.LkWIdJywF01HrM6x6gDoyCh1Sv27oRpBjV_Vq9JoJas";
 
-    const configured =
-      SUPABASE_URL.startsWith("https://") &&
-      !SUPABASE_URL.includes("TU_SUPABASE_URL") &&
-      SUPABASE_PUBLISHABLE_KEY.length > 20 &&
-      !SUPABASE_PUBLISHABLE_KEY.includes("TU_SUPABASE");
+    const $ = (s, r = document) => r.querySelector(s);
+    const root = $("#root");
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+    const pad = n => String(n).padStart(2, "0");
+    const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    const fdate = s => new Date(s + "T00:00").toLocaleDateString("es", { day:"numeric", month:"short" });
+    const money = (n, cur) => new Intl.NumberFormat("es-CO", { style:"currency", currency: cur || "COP", maximumFractionDigits:0 }).format(n);
+    const toHex = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+    const sha256 = async s => toHex(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)));
+    const newToken = () => toHex(crypto.getRandomValues(new Uint8Array(24)));
+    const INVITE_KEY = "richendy_invite";
 
-    let supabaseClient = null;
-    if (configured && window.supabase?.createClient) {
-      supabaseClient = window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_PUBLISHABLE_KEY,
-        {
-          auth: {
-            persistSession: true,
-            autoRefreshToken: true,
-            detectSessionInUrl: true
-          }
-        }
-      );
+    let toastT;
+    function toast(msg, kind) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 4200); }
+    async function run(fn, after) { try { await fn(); if (after) await after(); } catch (e) { toast(e?.message || "Algo salió mal. Inténtalo de nuevo."); } }
+    const ok = r => { if (r.error) throw r.error; return r.data; };
+
+    // La invitación llega en #invite=TOKEN: se guarda y se quita de la URL antes de iniciar Supabase.
+    const inv = location.hash.match(/invite=([a-f0-9]{48})/i);
+    if (inv) { sessionStorage.setItem(INVITE_KEY, inv[1]); history.replaceState(null, "", location.pathname + location.search); }
+
+    if (!window.supabase) { root.innerHTML = '<div class="setup">No se pudo cargar Supabase. Revisa tu conexión y recarga la página.</div>'; throw new Error("supabase-js no cargó"); }
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true } });
+
+    const now0 = new Date();
+    const state = { me: null, home: null, tab: "tasks", mode: "login", month: { y: now0.getFullYear(), m: now0.getMonth() }, day: null, profiles: {} };
+    const MES = (y, m) => new Date(y, m, 1).toLocaleDateString("es", { month: "long", year: "numeric" });
+    const mRange = () => { const { y, m } = state.month; return [iso(new Date(y, m, 1)), iso(new Date(y, m + 1, 0))]; };
+    const shiftMonth = n => { const d = new Date(state.month.y, state.month.m + n, 1); state.month = { y: d.getFullYear(), m: d.getMonth() }; state.day = null; showTab("tasks"); };
+    // Color de cada persona: el que eligió en su perfil; si no ha elegido, los colores de la marca.
+    const colorOf = id => state.profiles[id]?.color || (id === state.me.id ? "#c7ff4a" : "#e9ecdf");
+    function occurrences(start, rep, last) {
+      const out = [], end = new Date(last + "T00:00"), step = { once: 0, daily: 1, weekly: 7, biweekly: 14 }[rep];
+      for (let d = new Date(start + "T00:00"); d <= end && out.length < 62; d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + step)) { out.push(iso(d)); if (!step) break; }
+      return out;
+    }
+    const who = id => id === state.me.id ? "Tú" : (state.profiles[id]?.name || "Tu pareja");
+    const acc = id => id === state.me.id ? "mí" : (state.profiles[id]?.name || "tu pareja");
+    const memberOptions = sel => state.home.members.map(m => `<option value="${m.user_id}" ${m.user_id === sel ? "selected" : ""}>${who(m.user_id)}</option>`).join("");
+
+    /* ---------- Sesión y rutas ---------- */
+    sb.auth.onAuthStateChange((event, session) => {
+      if (event === "TOKEN_REFRESHED" || event === "USER_UPDATED") return;
+      if (event === "SIGNED_IN" && state.me && session?.user?.id === state.me.id) return;
+      state.me = session?.user ?? null; state.home = null;
+      setTimeout(route, 0); // no llamar a Supabase dentro del callback
+    });
+
+    async function loadHome() {
+      const mem = ok(await sb.from("household_members").select("household_id, role, households(id, name)").eq("user_id", state.me.id).order("joined_at").limit(1));
+      if (!mem.length) return null;
+      const members = ok(await sb.from("household_members").select("user_id, role").eq("household_id", mem[0].household_id));
+      await loadProfiles(mem[0].household_id);
+      return { id: mem[0].household_id, name: mem[0].households?.name || "Mi hogar", role: mem[0].role, members };
     }
 
-    const $ = (id) => document.getElementById(id);
-    const localKey = "richendy_local_v1";
-    let currentUser = null;
-    let currentSession = null;
-    let currentPage = "home";
-    let toastTimer = null;
+    async function route() {
+      if (!state.me) return renderAuth();
+      root.innerHTML = '<p class="muted" style="text-align:center;padding:60px 0">Cargando…</p>';
+      try {
+        state.home = await loadHome();
+        const t = sessionStorage.getItem(INVITE_KEY);
+        if (t) {
+          sessionStorage.removeItem(INVITE_KEY);
+          if (!state.home) {
+            try { ok(await sb.rpc("accept_household_invitation", { invitation_token_hash: await sha256(t) })); state.home = await loadHome(); toast("Te uniste al hogar."); }
+            catch (e) { toast(e.message); }
+          }
+        }
+        state.home ? renderApp() : renderOnboarding();
+      } catch (e) {
+        root.innerHTML = `<div class="card"><div class="message error show">${esc(e.message)}</div><button class="secondary" id="out" style="margin-top:12px">Cerrar sesión</button></div>`;
+        $("#out").onclick = () => sb.auth.signOut();
+      }
+    }
 
-    const pageTitles = {
-      home: "Nuestro pequeño universo ♡",
-      couple: "Conocernos con cariño",
-      planning: "Nuestros planes",
-      activities: "Momentos por compartir",
-      finances: "Finanzas compartidas",
-      shopping: "Nuestra lista de compras",
-      dashboard: "Nuestro progreso",
-      settings: "Tu espacio, a tu manera"
+    /* ---------- Acceso ---------- */
+    function renderAuth() {
+      const up = state.mode === "signup";
+      root.innerHTML = `
+      <div class="brand" style="margin-bottom:24px"><div class="mark">R</div><div><div class="brand-name">richendy</div><div class="brand-sub">Un hogar compartido, más organizado.</div></div></div>
+      <section class="card" style="padding:28px">
+        <div class="eyebrow">Tu espacio compartido</div>
+        <h1>${up ? "Empieza por aquí." : "Qué bueno verte."}</h1>
+        <p class="intro">${up ? "Crea tu cuenta personal para empezar a usar Richendy." : "Inicia sesión para entrar a Richendy y continuar organizando el hogar."}</p>
+        ${sessionStorage.getItem(INVITE_KEY) ? '<div class="notice">Te invitaron a un hogar. Entra con el correo al que llegó la invitación.</div>' : ""}
+        <div class="seg"><button type="button" id="tLogin" class="${up ? "" : "active"}">Iniciar sesión</button><button type="button" id="tSignup" class="${up ? "active" : ""}">Crear cuenta</button></div>
+        <form id="authForm">
+          <label for="email">Correo electrónico</label>
+          <input id="email" type="email" autocomplete="email" placeholder="tu@correo.com" required>
+          <label for="password">Contraseña</label>
+          <input id="password" type="password" autocomplete="${up ? "new-password" : "current-password"}" minlength="8" placeholder="Mínimo 8 caracteres" required>
+          <button class="primary" id="go" type="submit">${up ? "Crear cuenta" : "Entrar a Richendy"}</button>
+        </form>
+        <div id="msg" class="message" role="status" aria-live="polite"></div>
+      </section>
+      <p class="muted" style="text-align:center;font-size:11px">Richendy · Privado para ustedes</p>`;
+      $("#tLogin").onclick = () => { state.mode = "login"; renderAuth(); };
+      $("#tSignup").onclick = () => { state.mode = "signup"; renderAuth(); };
+      $("#authForm").addEventListener("submit", async e => {
+        e.preventDefault();
+        const msg = $("#msg"), go = $("#go"), email = $("#email").value.trim(), password = $("#password").value;
+        const show = (t, k) => { msg.textContent = t; msg.className = "message show " + k; };
+        msg.className = "message"; go.disabled = true;
+        try {
+          if (up) {
+            const { data, error } = await sb.auth.signUp({ email, password, options: { emailRedirectTo: location.origin + location.pathname } });
+            if (error) throw error;
+            if (!data.session) show("Cuenta creada. Revisa tu correo para confirmarla y luego inicia sesión.", "ok");
+          } else {
+            const { error } = await sb.auth.signInWithPassword({ email, password });
+            if (error) throw error;
+          }
+        } catch (err) { show(err?.message || "Ocurrió un error de autenticación.", "error"); }
+        finally { go.disabled = false; }
+      });
+    }
+
+    /* ---------- Crear hogar o unirse ---------- */
+    const logoutBtn = '<button class="secondary" id="out">Salir</button>';
+    function renderOnboarding() {
+      root.innerHTML = `<div class="top"><div class="brand"><div class="mark">R</div><div class="brand-name">richendy</div></div>${logoutBtn}</div>
+      <h1>Empecemos con su hogar</h1><p class="intro">Crea el hogar o únete con la invitación de tu pareja.</p>
+      <form class="card" id="createF"><h2>Crear un hogar nuevo</h2>
+        <label for="hn">Nombre del hogar</label><input id="hn" value="Nuestro hogar" minlength="2" maxlength="80" required>
+        <button class="primary">Crear hogar</button></form>
+      <form class="card" id="joinF"><h2>Unirme con una invitación</h2>
+        <p class="muted" style="margin:0">Pega el enlace que te compartieron. Debes tener sesión con el correo invitado.</p>
+        <label for="jc">Enlace de invitación</label><input id="jc" required autocomplete="off">
+        <button class="primary">Unirme al hogar</button></form>`;
+      $("#out").onclick = () => sb.auth.signOut();
+      $("#createF").addEventListener("submit", e => { e.preventDefault();
+        run(async () => ok(await sb.rpc("create_my_household", { household_name: $("#hn").value })), route); });
+      $("#joinF").addEventListener("submit", e => { e.preventDefault();
+        const m = $("#jc").value.match(/[a-f0-9]{48}/i);
+        run(async () => { if (!m) throw new Error("El enlace no es válido."); ok(await sb.rpc("accept_household_invitation", { invitation_token_hash: await sha256(m[0]) })); }, route); });
+    }
+
+    /* ---------- Pantalla principal ---------- */
+    const TABS = [["tasks","Tareas"], ["expenses","Gastos"], ["shopping","Compras"], ["home","Hogar"]];
+    function renderApp() {
+      root.innerHTML = `<div class="top"><div class="brand"><div class="mark">R</div><div><div class="brand-name">richendy</div><div class="brand-sub">${esc(state.home.name)}</div></div></div>${logoutBtn}</div>
+      <nav class="apptabs" aria-label="Secciones">${TABS.map(([k, t]) => `<button class="apptab" data-t="${k}">${t}</button>`).join("")}</nav><section id="panel"></section>`;
+      $("#out").onclick = () => sb.auth.signOut();
+      document.querySelectorAll(".apptab").forEach(b => b.onclick = () => showTab(b.dataset.t));
+      showTab(state.tab);
+    }
+    async function showTab(t) {
+      state.tab = t;
+      document.querySelectorAll(".apptab").forEach(b => b.classList.toggle("active", b.dataset.t === t));
+      $("#panel").innerHTML = P[t].form() + '<div id="list" class="list"><p class="empty">Cargando…</p></div>';
+      P[t].bindForm?.(); if (t === "home") bindProfile();
+      await refresh();
+    }
+    async function refresh() {
+      const t = state.tab, p = P[t]; if (!p || !$("#list")) return;
+      try { await loadProfiles(state.home.id); const html = await p.load(); if (state.tab !== t || !$("#list")) return; $("#list").innerHTML = html; p.bind?.(); }
+      catch (e) { if (state.tab === t && $("#list")) $("#list").innerHTML = `<div class="message error show">${esc(e.message)}</div>`; }
+    }
+    // Sincronización entre las dos cuentas: se actualiza la lista al volver a la pestaña y cada 25 s.
+    document.addEventListener("visibilitychange", () => { if (!document.hidden && state.home) refresh(); });
+    setInterval(() => { if (!document.hidden && state.home) refresh(); }, 25000);
+    const submit = (id, fn) => $(id).addEventListener("submit", e => { e.preventDefault(); const f = e.target; run(async () => { await fn(f); f.reset(); }, refresh); });
+    const delBtn = () => document.querySelectorAll("[data-del]");
+
+    /* ---------- Perfil: nombre y color de cada persona (profiles.display_name / accent_color) ---------- */
+    const SW = ["#c7ff4a", "#ff8fb1", "#7dd3fc", "#ffb454", "#c4a7ff", "#5eead4", "#ffe066", "#ff7a6b"];
+    const lum = h => { const [r, g, b] = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255).map(v => v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+    async function loadProfiles(hid) {
+      try { const rows = ok(await sb.rpc("list_household_profiles", { target_household_id: hid }));
+        state.profiles = Object.fromEntries(rows.map(r => [r.user_id, { name: (r.display_name || "").trim(), color: r.accent_color }])); }
+      catch (e) { /* se conservan los últimos valores */ }
+    }
+    function profileCard() {
+      const mine = state.profiles[state.me.id] || {}, col = mine.color || "#c7ff4a";
+      return `<form class="card" id="pff"><h2>Mi perfil</h2><p class="muted" style="margin:0">Tu nombre y tu color se ven en el calendario y en las tareas, y tu pareja los ve igual.</p>
+        <label for="pn">Nombre</label><input id="pn" maxlength="30" value="${esc(mine.name || "")}" placeholder="Cómo te ve tu pareja">
+        <label>Color</label><div class="sw" id="sw">${SW.map(c => `<button type="button" class="swb ${c === col.toLowerCase() ? "on" : ""}" data-c="${c}" style="--c:${c}" aria-label="Color ${c}"></button>`).join("")}<input type="color" id="pc" value="${col}" aria-label="Elegir otro color"></div>
+        <button class="primary">Guardar perfil</button></form>`;
+    }
+    function bindProfile() {
+      const mark = c => document.querySelectorAll(".swb").forEach(b => b.classList.toggle("on", b.dataset.c === c.toLowerCase()));
+      document.querySelectorAll(".swb").forEach(b => b.onclick = () => { $("#pc").value = b.dataset.c; mark(b.dataset.c); });
+      $("#pc").oninput = e => mark(e.target.value);
+      $("#pff").addEventListener("submit", e => { e.preventDefault(); run(async () => {
+        const color = $("#pc").value, name = $("#pn").value.trim();
+        if (lum(color) < 0.12) throw new Error("Elige un tono más claro para que se vea sobre el fondo oscuro.");
+        const r = ok(await sb.from("profiles").update({ display_name: name || null, accent_color: color }).eq("id", state.me.id).select("id"));
+        if (!r.length) throw new Error("No se encontró tu perfil.");
+        await loadProfiles(state.home.id); toast("Perfil guardado.");
+      }, refresh); });
+    }
+
+    const P = {
+      /* Tareas del mes: tasks (la tarea) + task_assignments (cada vez que toca) + activity_logs (quién la hizo) */
+      tasks: {
+        form: () => {
+          const { y, m } = state.month, [a, b] = mRange(), now = new Date();
+          const start = (now.getFullYear() === y && now.getMonth() === m) ? iso(now) : a;
+          return `<div class="monthnav"><button class="secondary" id="mp" aria-label="Mes anterior">‹</button><strong>${MES(y, m)}</strong><button class="secondary" id="mn" aria-label="Mes siguiente">›</button></div>
+          <details class="card" id="plan"><summary>Programar tareas del mes</summary>
+            <form id="pf"><label for="pt">Tarea</label><input id="pt" required maxlength="120" placeholder="Lavar los platos">
+              <div class="row"><div><label for="pr">Se repite</label><select id="pr"><option value="once">Una sola vez</option><option value="daily">Cada día</option><option value="weekly">Cada semana</option><option value="biweekly">Cada 2 semanas</option></select></div>
+              <div><label for="ps">Desde el día</label><input id="ps" type="date" required min="${a}" max="${b}" value="${start}"></div></div>
+              <label for="pw">Quién la hace</label><select id="pw"><option value="split">Dividir entre los dos (equilibrado)</option>${memberOptions("")}</select>
+              <button class="primary">Programar en el calendario</button></form></details>`;
+        },
+        bindForm: () => {
+          $("#mp").onclick = () => { shiftMonth(-1); };
+          $("#mn").onclick = () => { shiftMonth(1); };
+          $("#pf").addEventListener("submit", e => { e.preventDefault(); run(async () => {
+            const [a, b] = mRange(), rep = $("#pr").value, who_ = $("#pw").value;
+            const dates = occurrences($("#ps").value, rep, b);
+            if (!dates.length) throw new Error("No hay fechas dentro de este mes.");
+            const ids = state.home.members.map(x => x.user_id).sort((p, q) => (q === state.me.id) - (p === state.me.id));
+            const ex = ok(await sb.from("task_assignments").select("assigned_to").eq("household_id", state.home.id).gte("due_date", a).lte("due_date", b));
+            const count = Object.fromEntries(ids.map(id => [id, ex.filter(r => r.assigned_to === id).length]));
+            const rows = dates.map(d => { const to = who_ === "split" ? ids.reduce((best, id) => count[id] < count[best] ? id : best, ids[0]) : who_; count[to]++; return { household_id: state.home.id, assigned_to: to, assigned_by: state.me.id, due_date: d }; });
+            const t = ok(await sb.from("tasks").insert({ household_id: state.home.id, title: $("#pt").value.trim(), frequency: { once: "occasional", daily: "daily", weekly: "weekly", biweekly: "weekly" }[rep], created_by: state.me.id }).select("id").single());
+            const r = await sb.from("task_assignments").insert(rows.map(x => ({ ...x, task_id: t.id })));
+            if (r.error) { await sb.from("tasks").delete().eq("id", t.id); throw r.error; }
+            $("#pf").reset(); $("#plan").open = false; toast(`Programadas ${rows.length} ${rows.length === 1 ? "vez" : "veces"} en el mes.`);
+          }, refresh); });
+        },
+        load: async () => {
+          const [a, b] = mRange(), { y, m } = state.month, mem = state.home.members.map(x => x.user_id);
+          const rows = ok(await sb.from("task_assignments").select("id, status, due_date, assigned_to, tasks(title)").eq("household_id", state.home.id).gte("due_date", a).lte("due_date", b).order("due_date").limit(500));
+          const logs = ok(await sb.from("activity_logs").select("task_assignment_id, user_id").eq("household_id", state.home.id).eq("action", "task_completed").gte("created_at", new Date(y, m - 1, 1).toISOString()).order("created_at").limit(1000));
+          const by = {}; logs.forEach(l => by[l.task_assignment_id] = l.user_id); // la última marca gana
+          const doneBy = r => by[r.id] || r.assigned_to, isDone = r => r.status === "completed";
+          const sum = mem.map(id => `<div class="pc" style="--pc:${colorOf(id)}"><strong>${who(id)}</strong>
+            <span>Asignadas: ${rows.filter(r => r.assigned_to === id).length}</span><span>Hechas por ${id === state.me.id ? "ti" : acc(id)}: ${rows.filter(r => isDone(r) && doneBy(r) === id).length}</span>
+            <span>Pendientes: ${rows.filter(r => r.assigned_to === id && !isDone(r)).length}</span></div>`).join("");
+          const first = new Date(y, m, 1), lead = (first.getDay() + 6) % 7, days = new Date(y, m + 1, 0).getDate(), today = iso(new Date());
+          let cal = ["L","M","X","J","V","S","D"].map(d => `<div class="wd">${d}</div>`).join("") + '<div class="dayb empty"></div>'.repeat(lead);
+          for (let d = 1; d <= days; d++) {
+            const ds = iso(new Date(y, m, d)), rs = rows.filter(r => r.due_date === ds);
+            cal += `<button type="button" class="dayb ${ds === today ? "today" : ""} ${ds === state.day ? "sel" : ""}" data-day="${ds}" aria-label="${d} de ${MES(y, m)}: ${rs.length} tareas"><span>${d}</span>
+              <span class="dots">${rs.slice(0, 4).map(r => `<i class="dot ${isDone(r) ? "full" : ""}" style="--pc:${colorOf(r.assigned_to)}"></i>`).join("")}</span></button>`;
+          }
+          const item = r => { const done = isDone(r), other = mem.find(id => id !== r.assigned_to);
+            return `<div class="item ${done ? "done" : ""}"><i class="dot full" style="--pc:${colorOf(done ? doneBy(r) : r.assigned_to)}"></i><input type="checkbox" data-id="${r.id}" aria-label="Marcar como hecha" ${done ? "checked" : ""}>
+              <span class="grow"><strong>${esc(r.tasks?.title)}</strong><span class="meta">${done ? "Hecha por: " + who(doneBy(r)) : "Asignada a: " + who(r.assigned_to)}</span></span>
+              ${!done && other ? `<button class="x" data-move="${r.id}" data-to="${other}">Pasar a ${acc(other)}</button>` : ""}<button class="x" data-del="${r.id}">Quitar</button></div>`; };
+          const shown = state.day ? rows.filter(r => r.due_date === state.day) : rows;
+          let list = "", last = "";
+          shown.forEach(r => { if (r.due_date !== last) { last = r.due_date; list += `<div class="dayh">${new Date(last + "T00:00").toLocaleDateString("es", { weekday: "long", day: "numeric", month: "short" })}</div>`; } list += item(r); });
+          return `<div class="sum">${sum}</div><p class="muted" style="font-size:12px;margin:8px 2px 0">Estos números sirven para conversar y ajustar el reparto, no para compararse.</p>
+            <div class="cal">${cal}</div>
+            <div class="dayh" style="display:flex;justify-content:space-between;align-items:center"><span>${state.day ? "Día seleccionado" : "Todo el mes"}</span>${state.day ? '<button class="link" id="allm">Ver todo el mes</button>' : ""}</div>
+            ${list || '<p class="empty">No hay tareas programadas. Usa «Programar tareas del mes».</p>'}`;
+        },
+        bind: () => {
+          document.querySelectorAll("[data-day]").forEach(b => b.onclick = () => { state.day = state.day === b.dataset.day ? null : b.dataset.day; refresh(); });
+          $("#allm")?.addEventListener("click", () => { state.day = null; refresh(); });
+          document.querySelectorAll("#list input[type=checkbox]").forEach(c => c.onchange = () => run(async () => {
+            ok(await sb.from("task_assignments").update(c.checked ? { status: "completed", completed_at: new Date().toISOString() } : { status: "pending", completed_at: null }).eq("id", c.dataset.id));
+            if (c.checked) ok(await sb.from("activity_logs").insert({ household_id: state.home.id, user_id: state.me.id, task_assignment_id: c.dataset.id, action: "task_completed" }));
+          }, refresh));
+          document.querySelectorAll("[data-move]").forEach(b => b.onclick = () => run(async () => ok(await sb.from("task_assignments").update({ assigned_to: b.dataset.to }).eq("id", b.dataset.move)), refresh));
+          delBtn().forEach(b => b.onclick = () => run(async () => ok(await sb.from("task_assignments").delete().eq("id", b.dataset.del)), refresh));
+        }
+      },
+      /* Gastos: expenses (mes actual) */
+      expenses: {
+        form: () => `<form class="card" id="f"><label for="et" style="margin-top:0">¿Qué se pagó?</label><input id="et" required maxlength="120" placeholder="Mercado de la semana">
+          <div class="row"><div><label for="ea">Monto</label><input id="ea" type="number" min="1" step="any" inputmode="decimal" required></div>
+          <div><label for="ec">Categoría</label><select id="ec">${["Mercado","Servicios","Hogar","Salidas","Otros"].map(c => `<option>${c}</option>`).join("")}</select></div></div>
+          <div class="row"><div><label for="ep">Pagó</label><select id="ep">${memberOptions(state.me.id)}</select></div>
+          <div><label for="ed">Fecha</label><input id="ed" type="date" required value="${iso(new Date())}"></div></div>
+          <button class="primary">Registrar gasto</button></form>`,
+        bindForm: () => submit("#f", async () => ok(await sb.from("expenses").insert({ household_id: state.home.id, created_by: state.me.id, paid_by: $("#ep").value,
+          title: $("#et").value.trim(), category: $("#ec").value, amount: parseFloat($("#ea").value), expense_date: $("#ed").value }))),
+        load: async () => {
+          const n = new Date(), from = iso(new Date(n.getFullYear(), n.getMonth(), 1));
+          const d = ok(await sb.from("expenses").select("id, title, category, amount, currency, paid_by, expense_date").eq("household_id", state.home.id).gte("expense_date", from).order("expense_date", { ascending: false }).limit(200));
+          const sum = a => a.reduce((s, x) => s + Number(x.amount), 0), cur = d[0]?.currency;
+          const per = state.home.members.map(m => `${who(m.user_id)}: ${money(sum(d.filter(x => x.paid_by === m.user_id)), cur)}`).join(" · ");
+          return `<div class="total"><span class="muted">Este mes</span><strong>${money(sum(d), cur)}</strong></div><p class="muted" style="margin:8px 2px 0">${per}</p>` +
+            (d.length ? d.map(x => `<div class="item"><span class="grow"><strong>${esc(x.title)}</strong><span class="meta">${esc(x.category)} · pagó ${who(x.paid_by)} · ${fdate(x.expense_date)}</span></span>
+              <span class="amount">${money(x.amount, x.currency)}</span><button class="x" data-del="${x.id}">Quitar</button></div>`).join("") : '<p class="empty">No hay gastos este mes.</p>');
+        },
+        bind: () => delBtn().forEach(b => b.onclick = () => run(async () => ok(await sb.from("expenses").delete().eq("id", b.dataset.del)), refresh))
+      },
+      /* Compras: shopping_items */
+      shopping: {
+        form: () => `<form class="card" id="f"><div class="row"><div><label for="sn" style="margin-top:0">Producto</label><input id="sn" required maxlength="80" placeholder="Arroz"></div>
+          <div><label for="sq" style="margin-top:0">Cantidad</label><input id="sq" type="number" min="0.01" step="any" value="1" required></div></div>
+          <button class="primary">Agregar a la lista</button></form>`,
+        bindForm: () => submit("#f", async () => ok(await sb.from("shopping_items").insert({ household_id: state.home.id, created_by: state.me.id, name: $("#sn").value.trim(), quantity: parseFloat($("#sq").value) }))),
+        load: async () => {
+          const d = ok(await sb.from("shopping_items").select("id, name, quantity, status").eq("household_id", state.home.id).neq("status", "cancelled").order("created_at").limit(200));
+          d.sort((a, b) => (a.status === "purchased") - (b.status === "purchased"));
+          return d.length ? d.map(i => `<div class="item ${i.status === "purchased" ? "done" : ""}"><input type="checkbox" data-id="${i.id}" aria-label="Marcar como comprado" ${i.status === "purchased" ? "checked" : ""}>
+            <span class="grow"><strong>${esc(i.name)}</strong><span class="meta">Cantidad: ${Number(i.quantity)}</span></span><button class="x" data-del="${i.id}">Quitar</button></div>`).join("")
+            : '<p class="empty">La lista está vacía.</p>';
+        },
+        bind: () => {
+          document.querySelectorAll("#list input[type=checkbox]").forEach(c => c.onchange = () => run(async () =>
+            ok(await sb.from("shopping_items").update(c.checked ? { status: "purchased", purchased_by: state.me.id, purchased_at: new Date().toISOString() } : { status: "pending", purchased_by: null, purchased_at: null }).eq("id", c.dataset.id)), refresh));
+          delBtn().forEach(b => b.onclick = () => run(async () => ok(await sb.from("shopping_items").delete().eq("id", b.dataset.del)), refresh));
+        }
+      },
+      /* Hogar: miembros e invitaciones (funciones existentes) */
+      home: {
+        form: () => profileCard() + `<form class="card" id="f"><h2>Invitar a tu pareja</h2><p class="muted" style="margin:0">Escribe el correo con el que ella o él creó su cuenta. El enlace es personal, vence en 7 días y solo funciona con ese correo.</p>
+          <label for="ie">Correo de tu pareja</label><input id="ie" type="email" required autocomplete="off"><button class="primary">Crear enlace de invitación</button><div id="invOut"></div></form>`,
+        bindForm: () => $("#f").addEventListener("submit", e => { e.preventDefault(); run(async () => {
+          const token = newToken();
+          ok(await sb.rpc("create_household_invitation", { target_household_id: state.home.id, target_email: $("#ie").value, target_token_hash: await sha256(token) }));
+          const link = `${location.origin}${location.pathname}#invite=${token}`;
+          $("#invOut").innerHTML = `<label for="il">Enlace (se muestra una sola vez)</label><input id="il" readonly value="${esc(link)}"><button type="button" class="secondary" id="cp" style="margin-top:10px">Copiar enlace</button>`;
+          $("#cp").onclick = () => navigator.clipboard.writeText(link).then(() => toast("Enlace copiado."));
+          $("#ie").value = "";
+        }, refresh); }),
+        load: async () => {
+          const rows = ok(await sb.rpc("list_household_invitations", { target_household_id: state.home.id }));
+          const ST = { pending: "Pendiente", accepted: "Aceptada", revoked: "Revocada", expired: "Vencida" };
+          return `<div class="card"><h2>${esc(state.home.name)}</h2><div class="list">${state.home.members.map(m => `<div class="item"><span class="grow"><strong>${who(m.user_id)}</strong></span><span class="chip ${m.role === "owner" ? "lime" : ""}">${m.role === "owner" ? "Creó el hogar" : "Miembro"}</span></div>`).join("")}</div></div>
+            <div class="card"><h2>Invitaciones</h2><div class="list">${rows.length ? rows.map(r => `<div class="item"><span class="grow"><strong>${esc(r.invited_email)}</strong><span class="meta">Vence ${fdate(r.expires_at.slice(0, 10))}</span></span>
+              <span class="chip ${r.invitation_status === "pending" ? "lime" : ""}">${ST[r.invitation_status] || esc(r.invitation_status)}</span>
+              ${r.invitation_status === "pending" ? `<button class="x" data-rev="${r.invitation_id}">Revocar</button>` : ""}</div>`).join("") : '<p class="empty">Aún no hay invitaciones.</p>'}</div></div>`;
+        },
+        bind: () => document.querySelectorAll("[data-rev]").forEach(b => b.onclick = () => run(async () => ok(await sb.rpc("revoke_household_invitation", { target_invitation_id: b.dataset.rev })), refresh))
+      }
     };
 
-    const emptyState = () => ({
-      activities: [],
-      shopping: [],
-      agreements: [],
-      profile: { name: "", photo: "" },
-      coupleProfiles: {}
-    });
-
-    function loadLocalData() {
-      try {
-        const saved = localStorage.getItem(localKey);
-        if (!saved) return emptyState();
-        const parsed = JSON.parse(saved);
-        const base = emptyState();
-        return {
-          ...base,
-          ...parsed,
-          activities: Array.isArray(parsed.activities) ? parsed.activities : [],
-          shopping: Array.isArray(parsed.shopping) ? parsed.shopping : [],
-          agreements: Array.isArray(parsed.agreements) ? parsed.agreements : [],
-          profile: { ...base.profile, ...(parsed.profile || {}) },
-          coupleProfiles: parsed.coupleProfiles || {}
-        };
-      } catch (error) {
-        console.error("No se pudieron leer los datos locales.", error);
-        return emptyState();
-      }
-    }
-
-    let localData = loadLocalData();
-
-    function saveLocalData() {
-      try {
-        localStorage.setItem(localKey, JSON.stringify(localData));
-        renderAll();
-        return true;
-      } catch (error) {
-        showToast("No se pudieron guardar los datos en este navegador.");
-        return false;
-      }
-    }
-
-    function escapeHTML(value) {
-      return String(value ?? "").replace(/[&<>"']/g, (char) => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;",
-        '"': "&quot;", "'": "&#39;"
-      })[char]);
-    }
-
-    function formatDate(dateString) {
-      if (!dateString) return "Sin fecha";
-      const date = new Date(dateString + "T12:00:00");
-      if (Number.isNaN(date.getTime())) return "Sin fecha";
-      return new Intl.DateTimeFormat("es", {
-        day: "numeric", month: "short", year: "numeric"
-      }).format(date);
-    }
-
-    function showToast(message) {
-      $("toast").textContent = message;
-      $("toast").classList.remove("hidden");
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => $("toast").classList.add("hidden"), 4000);
-    }
-
-    function setAuthMessage(message, type = "") {
-      $("authMessage").textContent = message;
-      $("authMessage").className = "notice" + (type ? " " + type : "");
-    }
-
-    function setButtonLoading(button, loading, label) {
-      button.disabled = loading;
-      if (loading) {
-        button.dataset.originalLabel = button.textContent;
-        button.textContent = label || "Procesando…";
-      } else {
-        button.textContent = button.dataset.originalLabel || button.textContent;
-      }
-    }
-
-    function showLoginMode(register = false) {
-      $("loginForm").classList.toggle("hidden", register);
-      $("registerForm").classList.toggle("hidden", !register);
-      setAuthMessage("");
-    }
-
-    function showApp() {
-      $("authScreen").classList.add("hidden");
-      $("appScreen").classList.remove("hidden");
-      $("settingsEmail").textContent = currentUser?.email || "Cuenta autenticada";
-      $("connectionLabel").textContent = "Sesión activa";
-      $("connectionMessage").textContent = "La sesión está activa. Cada módulo debe conectarse con sus tablas existentes antes de guardar datos compartidos.";
-      const fallbackName = currentUser?.user_metadata?.full_name ||
-        currentUser?.user_metadata?.name ||
-        (currentUser?.email ? currentUser.email.split("@")[0] : "Mi perfil");
-      if (!localData.profile.name) localData.profile.name = fallbackName;
-      $("settingsName").value = localData.profile.name;
-      $("settingsPhoto").value = localData.profile.photo || "";
-      $("headerName").textContent = localData.profile.name || fallbackName;
-      $("headerAvatar").innerHTML = localData.profile.photo
-        ? `<img src="${escapeHTML(localData.profile.photo)}" alt="">`
-        : escapeHTML((localData.profile.name || fallbackName).charAt(0).toUpperCase());
-      $("todayLabel").textContent = new Intl.DateTimeFormat("es", {
-        weekday: "long", day: "numeric", month: "long"
-      }).format(new Date());
-      $("welcomeTitle").textContent = "Qué bonito seguir construyendo juntos, " +
-        (localData.profile.name || fallbackName) + ". 💗";
-      renderAll();
-      navigate(currentPage);
-    }
-
-    function showAuth() {
-      $("appScreen").classList.add("hidden");
-      $("authScreen").classList.remove("hidden");
-      currentUser = null;
-      currentSession = null;
-    }
-
-    function navigate(page) {
-      if (!pageTitles[page]) return;
-      currentPage = page;
-      document.querySelectorAll(".page").forEach((el) => el.classList.remove("active"));
-      $("page-" + page).classList.add("active");
-      document.querySelectorAll("[data-page]").forEach((el) => {
-        el.classList.toggle("active", el.dataset.page === page);
-      });
-      $("topbarTitle").textContent = pageTitles[page];
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    function renderActivityItem(item, showActions = true) {
-      return `
-        <div class="list-item">
-          <div class="card-icon bg-pink">${item.type === "date" ? "💕" : item.type === "home" ? "🏡" : "✨"}</div>
-          <div class="item-main">
-            <strong>${escapeHTML(item.title)}</strong>
-            <small>${escapeHTML(formatDate(item.date))}${item.note ? " · " + escapeHTML(item.note) : ""}</small>
-          </div>
-          <span class="tag">${item.done ? "Completado" : "Plan"}</span>
-          ${showActions ? `<div class="item-actions">
-            <button class="icon-btn" style="width:34px;height:34px;font-size:14px" data-toggle-activity="${escapeHTML(item.id)}" title="Cambiar estado" aria-label="Cambiar estado">✓</button>
-            <button class="icon-btn" style="width:34px;height:34px;font-size:14px" data-delete-activity="${escapeHTML(item.id)}" title="Eliminar" aria-label="Eliminar">×</button>
-          </div>` : ""}
-        </div>`;
-    }
-
-    function renderAll() {
-      const activities = localData.activities;
-      const shopping = localData.shopping;
-      const agreements = localData.agreements;
-      const pendingShopping = shopping.filter((item) => !item.done);
-      const upcoming = [...activities].sort((a, b) =>
-        (a.date || "9999-99-99").localeCompare(b.date || "9999-99-99")
-      );
-
-      $("homeActivityCount").textContent = activities.length;
-      $("homeShoppingCount").textContent = pendingShopping.length;
-      $("homeMemberCount").textContent = "2";
-      $("homeHouseholdLabel").textContent = "Richard + Wendy · espacio de pareja";
-      $("planningCount").textContent = activities.length;
-      $("planningProgress").style.width = Math.min(100, activities.length * 10) + "%";
-      $("dashActivities").textContent = activities.length;
-      $("dashShopping").textContent = pendingShopping.length;
-      $("dashAgreements").textContent = agreements.length;
-
-      $("homeUpcoming").innerHTML = upcoming.length
-        ? upcoming.slice(0, 4).map((item) => renderActivityItem(item, false)).join("")
-        : `<div class="empty"><div class="empty-icon">🌷</div><strong>Aún no hay planes guardados</strong><br>Empiecen con algo sencillo que quieran hacer juntos.</div>`;
-
-      $("planningActivities").innerHTML = upcoming.length
-        ? upcoming.map((item) => renderActivityItem(item)).join("")
-        : `<div class="empty">No hay planes todavía.<br>¡Creen el primero!</div>`;
-
-      $("activityList").innerHTML = upcoming.length
-        ? upcoming.map((item) => renderActivityItem(item)).join("")
-        : `<div class="empty"><div class="empty-icon">💗</div><strong>Hay espacio para nuevos recuerdos</strong><br>Añadan una cita, una salida o una idea pendiente.</div>`;
-
-      $("shoppingList").innerHTML = shopping.length
-        ? shopping.map((item) => `
-          <div class="list-item">
-            <input type="checkbox" data-toggle-shopping="${escapeHTML(item.id)}" ${item.done ? "checked" : ""} aria-label="Marcar ${escapeHTML(item.title)} como comprado">
-            <div class="item-main">
-              <strong style="${item.done ? "text-decoration:line-through;opacity:.55" : ""}">${escapeHTML(item.title)}</strong>
-              <small>${escapeHTML(item.category || "General")}${item.note ? " · " + escapeHTML(item.note) : ""}</small>
-            </div>
-            <button class="icon-btn" style="width:34px;height:34px" data-delete-shopping="${escapeHTML(item.id)}" aria-label="Eliminar artículo">×</button>
-          </div>`).join("")
-        : `<div class="empty"><div class="empty-icon">🛍️</div><strong>Tu lista está esperando</strong><br>Añade lo que necesiten para la semana.</div>`;
-
-      $("shoppingProgressText").textContent =
-        (shopping.length - pendingShopping.length) + " de " + shopping.length;
-      $("shoppingProgress").style.width =
-        shopping.length ? ((shopping.length - pendingShopping.length) / shopping.length * 100) + "%" : "0%";
-
-      $("agreementList").innerHTML = agreements.length
-        ? agreements.map((item) => `
-          <div class="list-item">
-            <div class="item-main"><strong>${escapeHTML(item.title)}</strong><small>${escapeHTML(item.note || "Acuerdo compartido")}</small></div>
-            <button class="icon-btn" style="width:34px;height:34px" data-delete-agreement="${escapeHTML(item.id)}" aria-label="Eliminar acuerdo">×</button>
-          </div>`).join("")
-        : `<div class="empty">Todavía no han guardado acuerdos.</div>`;
-
-      const profiles = localData.coupleProfiles || {};
-      $("richardPhoto").innerHTML = profiles.Richard?.photo
-        ? `<img src="${escapeHTML(profiles.Richard.photo)}" alt="Foto de Richard">` : "🧑🏻‍💻";
-      $("wendyPhoto").innerHTML = profiles.Wendy?.photo
-        ? `<img src="${escapeHTML(profiles.Wendy.photo)}" alt="Foto de Wendy">` : "🌷";
-    }
-
-    function openModal(kind, preset = {}) {
-      const backdrop = $("modalBackdrop");
-      const title = $("modalTitle");
-      const body = $("modalBody");
-
-      if (kind === "activity") {
-        title.textContent = "Un nuevo plan 💗";
-        body.innerHTML = `
-          <form id="activityForm">
-            <div class="form-field"><label for="activityTitle">¿Qué quieren hacer?</label><input id="activityTitle" maxlength="120" required placeholder="Ej. Cena especial"></div>
-            <div class="form-field"><label for="activityDate">¿Cuándo?</label><input id="activityDate" type="date"></div>
-            <div class="form-field"><label for="activityType">Tipo de plan</label><select id="activityType"><option value="date">Cita romántica</option><option value="home">En casa</option><option value="other">Otra experiencia</option></select></div>
-            <div class="form-field"><label for="activityNote">Notas (opcional)</label><textarea id="activityNote" maxlength="500" placeholder="Detalles, ideas o cosas que quieran recordar..."></textarea></div>
-            <button class="btn btn-primary btn-block" type="submit">Guardar plan ♡</button>
-            <p class="muted small" style="margin-top:12px">Se guardará en este navegador, no en la cuenta compartida.</p>
-          </form>`;
-        $("modalBackdrop").classList.remove("hidden");
-        $("activityForm").addEventListener("submit", (event) => {
-          event.preventDefault();
-          localData.activities.push({
-            id: crypto.randomUUID(),
-            title: $("activityTitle").value.trim(),
-            date: $("activityDate").value,
-            type: $("activityType").value,
-            note: $("activityNote").value.trim(),
-            done: false
-          });
-          saveLocalData();
-          closeModal();
-          showToast("Plan guardado en este navegador. 💗");
-        });
-      } else if (kind === "shopping") {
-        title.textContent = "Añadir a la lista 🛍️";
-        body.innerHTML = `
-          <form id="shoppingForm">
-            <div class="form-field"><label for="shoppingTitle">Artículo</label><input id="shoppingTitle" maxlength="120" required placeholder="Ej. Leche"></div>
-            <div class="form-field"><label for="shoppingCategory">Categoría</label><select id="shoppingCategory"><option>Alimentos</option><option>Hogar</option><option>Cuidado personal</option><option>Planes</option><option>General</option></select></div>
-            <div class="form-field"><label for="shoppingNote">Notas (opcional)</label><input id="shoppingNote" maxlength="250" placeholder="Cantidad, marca..."></div>
-            <button class="btn btn-primary btn-block" type="submit">Añadir artículo</button>
-            <p class="muted small" style="margin-top:12px">Se guardará en este navegador, no en la cuenta compartida.</p>
-          </form>`;
-        backdrop.classList.remove("hidden");
-        $("shoppingForm").addEventListener("submit", (event) => {
-          event.preventDefault();
-          localData.shopping.push({
-            id: crypto.randomUUID(),
-            title: $("shoppingTitle").value.trim(),
-            category: $("shoppingCategory").value,
-            note: $("shoppingNote").value.trim(),
-            done: false
-          });
-          saveLocalData();
-          closeModal();
-          showToast("Artículo añadido a tu lista.");
-        });
-      } else if (kind === "agreement") {
-        title.textContent = "Un acuerdo con cariño 💌";
-        body.innerHTML = `
-          <form id="agreementForm">
-            <div class="form-field"><label for="agreementTitle">Acuerdo o idea</label><input id="agreementTitle" maxlength="120" required placeholder="Ej. Reservar una noche para nosotros"></div>
-            <div class="form-field"><label for="agreementNote">Detalle (opcional)</label><textarea id="agreementNote" maxlength="500" placeholder="¿Qué significa para ustedes?"></textarea></div>
-            <button class="btn btn-primary btn-block" type="submit">Guardar acuerdo</button>
-            <p class="muted small" style="margin-top:12px">Se guardará en este navegador, no en la cuenta compartida.</p>
-          </form>`;
-        backdrop.classList.remove("hidden");
-        $("agreementForm").addEventListener("submit", (event) => {
-          event.preventDefault();
-          localData.agreements.push({
-            id: crypto.randomUUID(),
-            title: $("agreementTitle").value.trim(),
-            note: $("agreementNote").value.trim()
-          });
-          saveLocalData();
-          closeModal();
-          showToast("Acuerdo guardado en este navegador.");
-        });
-      } else if (kind === "profile") {
-        title.textContent = "Personalizar " + preset.name + " ♡";
-        body.innerHTML = `
-          <form id="coupleProfileForm">
-            <div class="form-field"><label for="coupleProfileName">Nombre visible</label><input id="coupleProfileName" maxlength="60" value="${escapeHTML(preset.name)}" required></div>
-            <div class="form-field"><label for="coupleProfilePhoto">URL pública de foto</label><input id="coupleProfilePhoto" type="url" maxlength="1000" placeholder="https://..." value="${escapeHTML(preset.photo || "")}"></div>
-            <button class="btn btn-primary btn-block" type="submit">Guardar perfil local</button>
-            <p class="muted small" style="margin-top:12px">Esta personalización solo se guarda en este navegador. No cambia el perfil de Supabase.</p>
-          </form>`;
-        backdrop.classList.remove("hidden");
-        $("coupleProfileForm").addEventListener("submit", (event) => {
-          event.preventDefault();
-          localData.coupleProfiles[preset.name] = {
-            name: $("coupleProfileName").value.trim(),
-            photo: $("coupleProfilePhoto").value.trim()
-          };
-          saveLocalData();
-          closeModal();
-          showToast("Personalización guardada localmente.");
-        });
-      }
-    }
-
-    function closeModal() {
-      $("modalBackdrop").classList.add("hidden");
-      $("modalBody").innerHTML = "";
-    }
-
-    // Acceso: requiere las credenciales públicas correctas del proyecto.
-    $("showRegister").addEventListener("click", () => showLoginMode(true));
-    $("showLogin").addEventListener("click", () => showLoginMode(false));
-
-    $("signInForm").addEventListener("submit", async (event) => {
-      event.preventDefault();
-      if (!supabaseClient) {
-        setAuthMessage("Configura SUPABASE_URL y SUPABASE_PUBLISHABLE_KEY en el código antes de iniciar sesión.", "error");
-        return;
-      }
-      const button = $("loginButton");
-      setButtonLoading(button, true, "Entrando…");
-      try {
-        const { data, error } = await supabaseClient.auth.signInWithPassword({
-          email: $("loginEmail").value.trim(),
-          password: $("loginPassword").value
-        });
-        if (error) throw error;
-        currentSession = data.session;
-        currentUser = data.user;
-        localData = loadLocalData();
-        showApp();
-        setAuthMessage("");
-      } catch (error) {
-        setAuthMessage(error.message || "No se pudo iniciar sesión.", "error");
-      } finally {
-        setButtonLoading(button, false);
-      }
-    });
-
-    $("signUpForm").addEventListener("submit", async (event) => {
-      event.preventDefault();
-      if (!supabaseClient) {
-        setAuthMessage("Configura primero la URL y la clave publicable de Supabase.", "error");
-        return;
-      }
-      const button = $("registerButton");
-      setButtonLoading(button, true, "Creando cuenta…");
-      try {
-        const name = $("registerName").value.trim();
-        const { data, error } = await supabaseClient.auth.signUp({
-          email: $("registerEmail").value.trim(),
-          password: $("registerPassword").value,
-          options: { data: { full_name: name, name } }
-        });
-        if (error) throw error;
-
-        if (data.session && data.user) {
-          currentSession = data.session;
-          currentUser = data.user;
-          localData = loadLocalData();
-          if (!localData.profile.name) localData.profile.name = name;
-          saveLocalData();
-          showApp();
-          setAuthMessage("");
-        } else {
-          showLoginMode(false);
-          setAuthMessage("La solicitud de registro se completó. Revisa tu correo si el proyecto requiere confirmar la cuenta antes de iniciar sesión.", "ok");
-        }
-      } catch (error) {
-        setAuthMessage(error.message || "No se pudo crear la cuenta.", "error");
-      } finally {
-        setButtonLoading(button, false);
-      }
-    });
-
-    $("forgotPasswordButton").addEventListener("click", async () => {
-      if (!supabaseClient) {
-        setAuthMessage("Configura primero las credenciales de Supabase.", "error");
-        return;
-      }
-      const email = $("loginEmail").value.trim();
-      if (!email) {
-        setAuthMessage("Escribe tu correo electrónico en el campo de acceso y vuelve a pulsar Recuperarla.", "error");
-        return;
-      }
-      try {
-        const redirectTo = window.location.origin + window.location.pathname;
-        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo });
-        if (error) throw error;
-        setAuthMessage("Si el correo existe, Supabase enviará las instrucciones de recuperación según la configuración del proyecto.", "ok");
-      } catch (error) {
-        setAuthMessage(error.message || "No se pudo solicitar la recuperación.", "error");
-      }
-    });
-
-    async function signOut() {
-      if (supabaseClient) {
-        const { error } = await supabaseClient.auth.signOut();
-        if (error) {
-          showToast("No se pudo cerrar la sesión: " + error.message);
-          return;
-        }
-      }
-      showAuth();
-      showLoginMode(false);
-      setAuthMessage("Has cerrado sesión.");
-    }
-    $("logoutButton").addEventListener("click", signOut);
-    $("settingsLogoutButton").addEventListener("click", signOut);
-
-    // Navegación y formularios locales.
-    document.querySelectorAll("[data-page]").forEach((button) => {
-      button.addEventListener("click", () => navigate(button.dataset.page));
-    });
-    document.querySelectorAll("[data-go]").forEach((button) => {
-      button.addEventListener("click", () => navigate(button.dataset.go));
-    });
-    document.querySelectorAll("[data-open-modal]").forEach((button) => {
-      button.addEventListener("click", () => openModal(button.dataset.openModal));
-    });
-    document.querySelectorAll("[data-edit-profile]").forEach((button) => {
-      button.addEventListener("click", () => {
-        const name = button.dataset.editProfile;
-        const saved = localData.coupleProfiles[name] || {};
-        openModal("profile", { name: saved.name || name, photo: saved.photo || "" });
-      });
-    });
-    $("topbarAddButton").addEventListener("click", () => openModal("activity"));
-    $("closeModalButton").addEventListener("click", closeModal);
-    $("modalBackdrop").addEventListener("click", (event) => {
-      if (event.target === $("modalBackdrop")) closeModal();
-    });
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") closeModal();
-    });
-
-    document.addEventListener("click", (event) => {
-      const activityToggle = event.target.closest("[data-toggle-activity]");
-      if (activityToggle) {
-        const item = localData.activities.find((entry) => entry.id === activityToggle.dataset.toggleActivity);
-        if (item) { item.done = !item.done; saveLocalData(); }
-      }
-      const activityDelete = event.target.closest("[data-delete-activity]");
-      if (activityDelete) {
-        localData.activities = localData.activities.filter((entry) => entry.id !== activityDelete.dataset.deleteActivity);
-        saveLocalData();
-        showToast("Actividad eliminada de este navegador.");
-      }
-      const shoppingDelete = event.target.closest("[data-delete-shopping]");
-      if (shoppingDelete) {
-        localData.shopping = localData.shopping.filter((entry) => entry.id !== shoppingDelete.dataset.deleteShopping);
-        saveLocalData();
-        showToast("Artículo eliminado de este navegador.");
-      }
-      const agreementDelete = event.target.closest("[data-delete-agreement]");
-      if (agreementDelete) {
-        localData.agreements = localData.agreements.filter((entry) => entry.id !== agreementDelete.dataset.deleteAgreement);
-        saveLocalData();
-        showToast("Acuerdo eliminado de este navegador.");
-      }
-    });
-
-    document.addEventListener("change", (event) => {
-      const checkbox = event.target.closest("[data-toggle-shopping]");
-      if (!checkbox) return;
-      const item = localData.shopping.find((entry) => entry.id === checkbox.dataset.toggleShopping);
-      if (item) { item.done = checkbox.checked; saveLocalData(); }
-    });
-
-    $("settingsForm").addEventListener("submit", (event) => {
-      event.preventDefault();
-      const name = $("settingsName").value.trim();
-      const photo = $("settingsPhoto").value.trim();
-      if (photo) {
-        try {
-          const url = new URL(photo);
-          if (url.protocol !== "https:" && url.protocol !== "http:") throw new Error("URL no permitida");
-        } catch {
-          showToast("Introduce una URL válida para la foto.");
-          return;
-        }
-      }
-      localData.profile.name = name || currentUser?.email?.split("@")[0] || "Mi perfil";
-      localData.profile.photo = photo;
-      saveLocalData();
-      showToast("Preferencias guardadas en este navegador.");
-    });
-
-    // Verificación de sesión y acceso de solo lectura a las tablas existentes.
-    async function checkConnection() {
-      if (!supabaseClient || !currentUser) {
-        $("connectionLabel").textContent = "Sin sesión";
-        $("connectionMessage").textContent = "Inicia sesión con una cuenta de Supabase.";
-        return;
-      }
-      $("connectionLabel").textContent = "Consultando…";
-      try {
-        const { data, error } = await supabaseClient.auth.getSession();
-        if (error) throw error;
-        if (!data.session) throw new Error("No hay una sesión activa.");
-        $("connectionLabel").textContent = "Sesión activa";
-        $("connectionMessage").textContent = "Supabase confirma una sesión válida. Esto no verifica todavía la sincronización de cada módulo.";
-        showToast("Sesión de Supabase verificada.");
-      } catch (error) {
-        $("connectionLabel").textContent = "Revisar";
-        $("connectionMessage").textContent = error.message || "No se pudo verificar la sesión.";
-      }
-    }
-    $("checkConnectionButton").addEventListener("click", checkConnection);
-
-    $("refreshFinanceButton").addEventListener("click", async () => {
-      if (!supabaseClient || !currentUser) {
-        $("financeStatus").textContent = "Inicia sesión para verificar el acceso.";
-        return;
-      }
-      $("financeStatus").textContent = "Comprobando sesión de usuario…";
-      try {
-        const { data, error } = await supabaseClient.auth.getSession();
-        if (error) throw error;
-        if (!data.session) throw new Error("La sesión no está activa.");
-        $("financeStatus").textContent = "Sesión válida. No se han leído ni modificado gastos o presupuestos. Para activar esos datos hay que confirmar el esquema de las tablas existentes.";
-      } catch (error) {
-        $("financeStatus").textContent = error.message || "No se pudo verificar la sesión.";
-      }
-    });
-
-    async function initialize() {
-      if (!supabaseClient) {
-        setAuthMessage("Antes de usar Richendy, configura las dos credenciales públicas de Supabase en el código.", "error");
-        return;
-      }
-      try {
-        const { data, error } = await supabaseClient.auth.getSession();
-        if (error) throw error;
-        if (data.session?.user) {
-          currentSession = data.session;
-          currentUser = data.session.user;
-          localData = loadLocalData();
-          showApp();
-        }
-        supabaseClient.auth.onAuthStateChange((event, session) => {
-          if (event === "SIGNED_OUT") {
-            showAuth();
-          } else if (session?.user && !currentUser) {
-            currentSession = session;
-            currentUser = session.user;
-            localData = loadLocalData();
-            showApp();
-          }
-        });
-      } catch (error) {
-        setAuthMessage("No se pudo comprobar la sesión: " + (error.message || "Error desconocido"), "error");
-      }
-    }
-
-    renderAll();
-    initialize();
+    sb.auth.getSession().then(({ data }) => { if (!state.me && data.session) { state.me = data.session.user; route(); } else if (!state.me) renderAuth(); });
   </script>
 </body>
 </html>
