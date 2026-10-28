@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#11130f">
+  <title>Richendy · Acceso</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b0c0a;
+      --panel: #151713;
+      --panel-2: #1d201a;
+      --text: #f2f4ec;
+      --muted: #a6aa9d;
+      --lime: #c7ff4a;
+      --border: #30342b;
+      --danger: #ff8d8d;
+      --success: #c7ff4a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; background:
+        radial-gradient(circle at 80% 10%, rgba(199,255,74,.09), transparent 28rem),
+        var(--bg); color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      display: grid; place-items: center; padding: 24px;
+    }
+    .wrap { width: 100%; max-width: 440px; }
+    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .mark { width: 42px; height: 42px; border-radius: 14px; background: var(--lime); color: #11130f; display:grid; place-items:center; font-weight: 900; font-size: 22px; }
+    .brand-name { font-size: 19px; font-weight: 800; letter-spacing: -.04em; }
+    .brand-sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+    .card { background: rgba(21,23,19,.96); border: 1px solid var(--border); border-radius: 24px; padding: 28px; box-shadow: 0 24px 70px rgba(0,0,0,.28); }
+    .eyebrow { color: var(--lime); text-transform: uppercase; letter-spacing: .13em; font-size: 11px; font-weight: 800; }
+    h1 { font-size: clamp(26px, 6vw, 34px); letter-spacing: -.05em; margin: 9px 0 8px; }
+    .intro { color: var(--muted); font-size: 14px; line-height: 1.55; margin: 0 0 22px; }
+    .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 5px; background: #0d0f0c; border: 1px solid var(--border); border-radius: 13px; margin-bottom: 22px; }
+    .tab { border: 0; padding: 11px; border-radius: 9px; background: transparent; color: var(--muted); font-weight: 700; cursor: pointer; }
+    .tab.active { background: var(--panel-2); color: var(--text); }
+    label { display: block; font-size: 12px; font-weight: 700; color: #dce0d4; margin: 14px 0 7px; }
+    input { width: 100%; padding: 13px 14px; border: 1px solid var(--border); background: #0d0f0c; border-radius: 12px; color: var(--text); font: inherit; outline: none; }
+    input:focus { border-color: var(--lime); box-shadow: 0 0 0 3px rgba(199,255,74,.1); }
+    .primary { width: 100%; border: 0; border-radius: 12px; padding: 14px 16px; margin-top: 20px; background: var(--lime); color: #11130f; font-weight: 850; font-size: 14px; cursor: pointer; }
+    .primary:disabled { opacity: .55; cursor: wait; }
+    .message { display: none; padding: 12px 13px; border-radius: 12px; font-size: 13px; line-height: 1.45; margin-top: 16px; overflow-wrap: anywhere; }
+    .message.show { display: block; }
+    .message.error { color: #ffd0d0; border: 1px solid #713c3c; background: #281716; }
+    .message.ok { color: var(--success); border: 1px solid #46572a; background: #1b2411; }
+    .session { display: none; margin-top: 20px; padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: #0d0f0c; }
+    .session.show { display: block; }
+    .session strong { color: var(--lime); }
+    .secondary { margin-top: 12px; border: 1px solid var(--border); border-radius: 10px; padding: 10px 13px; background: transparent; color: var(--text); font-weight: 700; cursor: pointer; }
+    .hint { color: var(--muted); font-size: 11px; line-height: 1.55; margin-top: 20px; }
+    footer { color: #707568; text-align: center; font-size: 11px; margin-top: 18px; }
+    .setup { display:none; margin-bottom: 16px; border: 1px solid #7a6233; color: #f5dca5; background: #282112; padding: 12px; border-radius: 12px; font-size: 13px; line-height: 1.5; }
+    .setup.show { display:block; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="brand">
+      <div class="mark">R</div>
+      <div><div class="brand-name">richendy</div><div class="brand-sub">Un hogar compartido, más organizado.</div></div>
+    </div>
+
+    <div id="setupWarning" class="setup">
+      <strong>Falta conectar Supabase.</strong><br>
+      En el código, reemplaza <code>PEGA_AQUI_TU_SUPABASE_URL</code> y <code>PEGA_AQUI_TU_SUPABASE_ANON_KEY</code> por los valores del proyecto. Usa únicamente la clave pública/anon o publishable; nunca la <code>service_role</code>.
+    </div>
+
+    <section class="card">
+      <div class="eyebrow">Tu espacio compartido</div>
+      <h1 id="heading">Qué bueno verte.</h1>
+      <p class="intro" id="intro">Inicia sesión para entrar a Richendy y continuar organizando el hogar.</p>
+
+      <div class="tabs" role="tablist" aria-label="Tipo de acceso">
+        <button class="tab active" id="loginTab" type="button">Iniciar sesión</button>
+        <button class="tab" id="signupTab" type="button">Crear cuenta</button>
+      </div>
+
+      <form id="authForm">
+        <label for="email">Correo electrónico</label>
+        <input id="email" name="email" type="email" autocomplete="email" placeholder="tu@correo.com" required>
+        <label for="password">Contraseña</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" minlength="8" placeholder="Mínimo 8 caracteres" required>
+        <button class="primary" id="submitBtn" type="submit">Entrar a Richendy</button>
+      </form>
+
+      <div id="message" class="message" role="status" aria-live="polite"></div>
+
+      <div id="sessionPanel" class="session">
+        <div><strong>Sesión activa</strong></div>
+        <div id="sessionEmail" style="font-size:13px;margin-top:6px;overflow-wrap:anywhere"></div>
+        <div id="sessionId" style="font-size:11px;color:var(--muted);margin-top:7px;overflow-wrap:anywhere"></div>
+        <button id="logoutBtn" class="secondary" type="button">Cerrar sesión</button>
+      </div>
+
+      <p class="hint" id="hint">Esta pantalla sirve para probar el registro y el inicio de sesión. Las funciones del hogar y las invitaciones se conectarán después de validar la autenticación.</p>
+    </section>
+    <footer>Richendy · Privado para ustedes</footer>
+  </main>
+
+  <script>
+    // 1. En Supabase: Project Settings → API.
+    // 2. Copia Project URL y la clave pública anon/publishable.
+    // Nunca pongas la clave service_role en el navegador.
+    const SUPABASE_URL = "PEGA_AQUI_TU_SUPABASE_URL";
+    const SUPABASE_ANON_KEY = "PEGA_AQUI_TU_SUPABASE_ANON_KEY";
+
+    const isConfigured =
+      SUPABASE_URL.startsWith("https://") &&
+      !SUPABASE_URL.includes("PEGA_AQUI") &&
+      SUPABASE_ANON_KEY.length > 20 &&
+      !SUPABASE_ANON_KEY.includes("PEGA_AQUI");
+
+    const setupWarning = document.getElementById("setupWarning");
+    const message = document.getElementById("message");
+    const form = document.getElementById("authForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const loginTab = document.getElementById("loginTab");
+    const signupTab = document.getElementById("signupTab");
+    const heading = document.getElementById("heading");
+    const intro = document.getElementById("intro");
+    const hint = document.getElementById("hint");
+    const sessionPanel = document.getElementById("sessionPanel");
+    const sessionEmail = document.getElementById("sessionEmail");
+    const sessionId = document.getElementById("sessionId");
+    const passwordInput = document.getElementById("password");
+    let mode = "login";
+    let supabaseClient = null;
+
+    if (!isConfigured || !window.supabase) {
+      setupWarning.classList.add("show");
+    } else {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+      });
+      refreshSession();
+      supabaseClient.auth.onAuthStateChange((_event, session) => showSession(session));
+    }
+
+    function showMessage(text, kind) {
+      message.textContent = text;
+      message.className = "message show " + (kind === "ok" ? "ok" : "error");
+    }
+    function clearMessage() {
+      message.textContent = "";
+      message.className = "message";
+    }
+    function setMode(nextMode) {
+      mode = nextMode;
+      const signup = mode === "signup";
+      loginTab.classList.toggle("active", !signup);
+      signupTab.classList.toggle("active", signup);
+      heading.textContent = signup ? "Empieza por aquí." : "Qué bueno verte.";
+      intro.textContent = signup
+        ? "Crea tu cuenta personal para empezar a usar Richendy."
+        : "Inicia sesión para entrar a Richendy y continuar organizando el hogar.";
+      submitBtn.textContent = signup ? "Crear cuenta" : "Entrar a Richendy";
+      passwordInput.autocomplete = signup ? "new-password" : "current-password";
+      hint.textContent = signup
+        ? "Si Supabase tiene activada la confirmación por correo, revisa tu bandeja de entrada para completar el registro."
+        : "Esta pantalla permite validar la autenticación. Las funciones del hogar y las invitaciones se conectarán después.";
+      clearMessage();
+    }
+    loginTab.addEventListener("click", () => setMode("login"));
+    signupTab.addEventListener("click", () => setMode("signup"));
+
+    async function refreshSession() {
+      if (!supabaseClient) return;
+      const { data, error } = await supabaseClient.auth.getSession();
+      if (error) showMessage("No se pudo comprobar la sesión: " + error.message, "error");
+      showSession(data?.session || null);
+    }
+    function showSession(session) {
+      if (!session) {
+        sessionPanel.classList.remove("show");
+        return;
+      }
+      sessionPanel.classList.add("show");
+      sessionEmail.textContent = session.user?.email || "Correo no disponible";
+      sessionId.textContent = "ID de usuario: " + (session.user?.id || "no disponible");
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      clearMessage();
+      if (!supabaseClient) {
+        showMessage("Primero configura la URL del proyecto y la clave pública de Supabase en el código HTML.", "error");
+        return;
+      }
+      const email = document.getElementById("email").value.trim();
+      const password = passwordInput.value;
+      submitBtn.disabled = true;
+      submitBtn.textContent = mode === "signup" ? "Creando cuenta..." : "Iniciando sesión...";
+      try {
+        if (mode === "signup") {
+          const { data, error } = await supabaseClient.auth.signUp({ email, password });
+          if (error) throw error;
+          if (data.session) {
+            showMessage("Cuenta creada e inicio de sesión realizado correctamente.", "ok");
+            showSession(data.session);
+          } else {
+            showMessage("Solicitud de registro completada. Si la confirmación por correo está activada en Supabase, revisa tu correo antes de iniciar sesión.", "ok");
+          }
+        } else {
+          const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+          if (error) throw error;
+          showMessage("Inicio de sesión correcto. Supabase reconoce esta cuenta.", "ok");
+          showSession(data.session);
+        }
+      } catch (error) {
+        showMessage(error?.message || "Ocurrió un error de autenticación.", "error");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = mode === "signup" ? "Crear cuenta" : "Entrar a Richendy";
+      }
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      if (!supabaseClient) return;
+      const { error } = await supabaseClient.auth.signOut();
+      if (error) showMessage("No se pudo cerrar la sesión: " + error.message, "error");
+      else {
+        showSession(null);
+        showMessage("Sesión cerrada correctamente.", "ok");
+      }
+    });
+  </script>
+</body>
+</html>
