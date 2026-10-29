@@ -293,15 +293,41 @@
       try { const rows = ok(await sb.from("member_availability").select("user_id, unavailable_days").eq("household_id", hid));
         state.avail = Object.fromEntries(rows.map(r => [r.user_id, r.unavailable_days || []])); } catch (e) { /* se conserva lo último */ }
     }
-    async function loadHome() {
-      const mem = ok(await sb.from("household_members").select("household_id, role, households(id, name)").eq("user_id", state.me.id).order("joined_at").limit(1));
-      if (!mem.length) return null;
-      const members = ok(await sb.from("household_members").select("user_id, role").eq("household_id", mem[0].household_id));
-      await loadProfiles(mem[0].household_id);
-      state.ext = true;
-      await loadPets(mem[0].household_id);
-      await loadAvail(mem[0].household_id);
-    }
+
+async function loadHome() {
+  const mem = ok(
+    await sb
+      .from("household_members")
+      .select("household_id, role, households(id, name)")
+      .eq("user_id", state.me.id)
+      .order("joined_at")
+      .limit(1)
+  );
+
+  if (!mem.length) return null;
+
+  const household = mem[0];
+
+  const members = ok(
+    await sb
+      .from("household_members")
+      .select("user_id, role")
+      .eq("household_id", household.household_id)
+  );
+
+  await loadProfiles(household.household_id);
+
+  state.ext = true;
+  await loadPets(household.household_id);
+  await loadAvail(household.household_id);
+
+  return {
+    id: household.household_id,
+    name: household.households?.name || "Mi hogar",
+    role: household.role,
+    members
+  };
+}
 
     async function route() {
       if (!state.me) return renderAuth();
