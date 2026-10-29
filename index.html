@@ -298,8 +298,9 @@
       if (!mem.length) return null;
       const members = ok(await sb.from("household_members").select("user_id, role").eq("household_id", mem[0].household_id));
       await loadProfiles(mem[0].household_id);
-      state.ext = false; await loadPets(mem[0].household_id); await loadAvail(mem[0].household_id);
-      return { id: mem[0].household_id, name: mem[0].households?.name || "Mi hogar", role: mem[0].role, members };
+      state.ext = true;
+      await loadPets(mem[0].household_id);
+      await loadAvail(mem[0].household_id);
     }
 
     async function route() {
